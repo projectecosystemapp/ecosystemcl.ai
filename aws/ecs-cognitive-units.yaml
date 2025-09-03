@@ -1,0 +1,407 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ECOSYSTEMCL.AI Persistent Cognitive Units - ECS Services for Q3 2025 Architecture
+
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues: [development, staging, production]
+    Description: Environment name
+  
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC for cognitive unit services
+  
+  PrivateSubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Private subnets for ECS services
+
+Resources:
+  # ECS Cluster for Persistent Cognitive Units
+  CognitiveUnitsCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub ecosystemcl-cognitive-units-${Environment}
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+      Configuration:
+        ExecuteCommandConfiguration:
+          Logging: DEFAULT
+      ServiceConnectDefaults:
+        Namespace: !Sub ecosystemcl-${Environment}.local
+
+  # Service Discovery Namespace
+  ServiceDiscoveryNamespace:
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+    Properties:
+      Name: !Sub ecosystemcl-${Environment}.local
+      Vpc: !Ref VpcId
+      Description: Service discovery for cognitive units
+
+  # Task Definition for CodeGeneratorUnit
+  CodeGeneratorUnitTaskDef:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub ecosystemcl-code-generator-${Environment}
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      Cpu: '2048'
+      Memory: '4096'
+      RuntimePlatform:
+        CpuArchitecture: ARM64
+        OperatingSystemFamily: LINUX
+      TaskRoleArn: !GetAtt CognitiveUnitTaskRole.Arn
+      ExecutionRoleArn: !GetAtt CognitiveUnitExecutionRole.Arn
+      ContainerDefinitions:
+        - Name: code-generator-unit
+          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/ecosystemcl-cognitive-unit:latest
+          Essential: true
+          Environment:
+            - Name: UNIT_TYPE
+              Value: CODE_GENERATOR
+            - Name: ENVIRONMENT
+              Value: !Ref Environment
+            - Name: PERSISTENT_STATE_ENABLED
+              Value: 'true'
+            - Name: LEARNING_MODE
+              Value: 'ADAPTIVE'
+          HealthCheck:
+            Command: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+            Interval: 30
+            Timeout: 5
+            Retries: 3
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CognitiveUnitLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: code-generator
+          PortMappings:
+            - ContainerPort: 8080
+              Protocol: tcp
+              AppProtocol: http
+
+  # ECS Service for CodeGeneratorUnit with Auto-Scaling
+  CodeGeneratorService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub ecosystemcl-code-generator-${Environment}
+      Cluster: !Ref CognitiveUnitsCluster
+      TaskDefinition: !Ref CodeGeneratorUnitTaskDef
+      DesiredCount: 2
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets: !Ref PrivateSubnetIds
+          SecurityGroups:
+            - !Ref CognitiveUnitSecurityGroup
+      ServiceConnectConfiguration:
+        Enabled: true
+        Namespace: !Sub ecosystemcl-${Environment}.local
+        Services:
+          - PortName: http
+            ClientAliases:
+              - Port: 8080
+                DnsName: code-generator
+      ServiceRegistries:
+        - RegistryArn: !GetAtt CodeGeneratorServiceDiscovery.Arn
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+
+  # Service Discovery for CodeGeneratorUnit
+  CodeGeneratorServiceDiscovery:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Name: code-generator
+      DnsConfig:
+        DnsRecords:
+          - Type: A
+            TTL: 60
+        NamespaceId: !Ref ServiceDiscoveryNamespace
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+
+  # Task Definition for SecurityAuditorUnit
+  SecurityAuditorUnitTaskDef:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub ecosystemcl-security-auditor-${Environment}
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      Cpu: '1024'
+      Memory: '2048'
+      RuntimePlatform:
+        CpuArchitecture: ARM64
+        OperatingSystemFamily: LINUX
+      TaskRoleArn: !GetAtt CognitiveUnitTaskRole.Arn
+      ExecutionRoleArn: !GetAtt CognitiveUnitExecutionRole.Arn
+      ContainerDefinitions:
+        - Name: security-auditor-unit
+          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/ecosystemcl-cognitive-unit:latest
+          Essential: true
+          Environment:
+            - Name: UNIT_TYPE
+              Value: SECURITY_AUDITOR
+            - Name: ENVIRONMENT
+              Value: !Ref Environment
+            - Name: PERSISTENT_STATE_ENABLED
+              Value: 'true'
+            - Name: LEARNING_MODE
+              Value: 'ADAPTIVE'
+          HealthCheck:
+            Command: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+            Interval: 30
+            Timeout: 5
+            Retries: 3
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CognitiveUnitLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: security-auditor
+          PortMappings:
+            - ContainerPort: 8080
+              Protocol: tcp
+              AppProtocol: http
+
+  # ECS Service for SecurityAuditorUnit
+  SecurityAuditorService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub ecosystemcl-security-auditor-${Environment}
+      Cluster: !Ref CognitiveUnitsCluster
+      TaskDefinition: !Ref SecurityAuditorUnitTaskDef
+      DesiredCount: 1
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets: !Ref PrivateSubnetIds
+          SecurityGroups:
+            - !Ref CognitiveUnitSecurityGroup
+      ServiceConnectConfiguration:
+        Enabled: true
+        Namespace: !Sub ecosystemcl-${Environment}.local
+        Services:
+          - PortName: http
+            ClientAliases:
+              - Port: 8080
+                DnsName: security-auditor
+      ServiceRegistries:
+        - RegistryArn: !GetAtt SecurityAuditorServiceDiscovery.Arn
+
+  # Service Discovery for SecurityAuditorUnit
+  SecurityAuditorServiceDiscovery:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Name: security-auditor
+      DnsConfig:
+        DnsRecords:
+          - Type: A
+            TTL: 60
+        NamespaceId: !Ref ServiceDiscoveryNamespace
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+
+  # Task Definition for MonitoringAgent
+  MonitoringAgentTaskDef:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub ecosystemcl-monitoring-agent-${Environment}
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      Cpu: '512'
+      Memory: '1024'
+      RuntimePlatform:
+        CpuArchitecture: ARM64
+        OperatingSystemFamily: LINUX
+      TaskRoleArn: !GetAtt MonitoringAgentTaskRole.Arn
+      ExecutionRoleArn: !GetAtt CognitiveUnitExecutionRole.Arn
+      ContainerDefinitions:
+        - Name: monitoring-agent
+          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/ecosystemcl-monitoring:latest
+          Essential: true
+          Environment:
+            - Name: UNIT_TYPE
+              Value: MONITORING_AGENT
+            - Name: ENVIRONMENT
+              Value: !Ref Environment
+            - Name: CLOUDWATCH_ENABLED
+              Value: 'true'
+            - Name: AUTO_REMEDIATION
+              Value: 'true'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref MonitoringLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: monitoring
+
+  # ECS Service for MonitoringAgent (Always-On)
+  MonitoringAgentService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub ecosystemcl-monitoring-${Environment}
+      Cluster: !Ref CognitiveUnitsCluster
+      TaskDefinition: !Ref MonitoringAgentTaskDef
+      DesiredCount: 3
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets: !Ref PrivateSubnetIds
+          SecurityGroups:
+            - !Ref CognitiveUnitSecurityGroup
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+
+  # Task Role for Cognitive Units
+  CognitiveUnitTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchFullAccess
+      Policies:
+        - PolicyName: CognitiveUnitAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:*
+                  - s3:*
+                  - sqs:*
+                  - secretsmanager:GetSecretValue
+                Resource: '*'
+
+  # Task Role for Monitoring Agent
+  MonitoringAgentTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchFullAccess
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+      Policies:
+        - PolicyName: MonitoringAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:FilterLogEvents
+                  - logs:PutSubscriptionFilter
+                  - lambda:GetFunction
+                  - lambda:ListFunctions
+                  - ecs:DescribeServices
+                  - ecs:DescribeTasks
+                  - cloudwatch:PutMetricData
+                  - cloudwatch:GetMetricStatistics
+                Resource: '*'
+
+  # Execution Role for ECS Tasks
+  CognitiveUnitExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  # Security Group for Cognitive Units
+  CognitiveUnitSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for cognitive units
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref CognitiveUnitSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+
+  # CloudWatch Log Groups
+  CognitiveUnitLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /ecs/ecosystemcl/cognitive-units/${Environment}
+      RetentionInDays: 30
+
+  MonitoringLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /ecs/ecosystemcl/monitoring/${Environment}
+      RetentionInDays: 90
+
+  # Auto Scaling for CodeGeneratorService
+  CodeGeneratorScalingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MaxCapacity: 10
+      MinCapacity: 2
+      ResourceId: !Sub service/${CognitiveUnitsCluster}/${CodeGeneratorService.Name}
+      RoleARN: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  CodeGeneratorScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: CodeGeneratorTargetTracking
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref CodeGeneratorScalingTarget
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+        TargetValue: 70
+        ScaleInCooldown: 300
+        ScaleOutCooldown: 60
+
+Outputs:
+  ClusterArn:
+    Description: ARN of the Cognitive Units ECS Cluster
+    Value: !GetAtt CognitiveUnitsCluster.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-ClusterArn
+
+  ServiceDiscoveryNamespace:
+    Description: Service discovery namespace for cognitive units
+    Value: !Sub ecosystemcl-${Environment}.local
+    Export:
+      Name: !Sub ${AWS::StackName}-ServiceDiscovery
+
+  CodeGeneratorEndpoint:
+    Description: Internal endpoint for CodeGeneratorUnit
+    Value: !Sub code-generator.ecosystemcl-${Environment}.local:8080
+
+  SecurityAuditorEndpoint:
+    Description: Internal endpoint for SecurityAuditorUnit  
+    Value: !Sub security-auditor.ecosystemcl-${Environment}.local:8080
