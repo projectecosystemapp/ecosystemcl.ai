@@ -95,6 +95,22 @@ const schema = a.schema({
       allow.owner(),
     ]),
 
+  // Credit transactions
+  CreditTransaction: a
+    .model({
+      transactionId: a.id().required(),
+      userId: a.string().required(),
+      amount: a.integer().required(),
+      type: a.enum(['purchase', 'usage', 'refund', 'bonus']),
+      description: a.string(),
+      planId: a.string(),
+      timestamp: a.datetime().required(),
+    })
+    .authorization((allow) => [
+      allow.owner(),
+      allow.groups(['admins']),
+    ]),
+
   // Usage tracking for billing
   UsageMetrics: a
     .model({
@@ -106,7 +122,8 @@ const schema = a.schema({
       executionsCount: a.integer().default(0),
       storageBytes: a.integer().default(0),
       computeSeconds: a.integer().default(0),
-      tier: a.enum(['free', 'pro', 'enterprise']),
+      creditsUsed: a.integer().default(0),
+      tier: a.enum(['starter', 'pro', 'team', 'enterprise']),
     })
     .authorization((allow) => [
       allow.owner(),
@@ -155,5 +172,8 @@ export const data = defineData({
     apiKeyAuthorizationMode: {
       expiresInDays: 30,
     },
+  },
+  subscriptions: {
+    level: 'public',
   },
 });
