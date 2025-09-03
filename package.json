@@ -1,7 +1,7 @@
 {
   "name": "forge-orchestrator",
   "version": "1.0.0",
-  "description": "Autonomous multi-agent development orchestrator for Claude Code",
+  "description": "An Autonomous Multi-Agent Orchestrator for High-Performance Engineering Teams",
   "main": "src/index.js",
   "bin": {
     "forge": "./bin/forge"
@@ -14,13 +14,26 @@
   },
   "keywords": [
     "ai",
+    "multi-agent",
     "orchestration",
+    "autonomous",
     "claude",
     "development",
-    "automation"
+    "automation",
+    "git",
+    "worktree",
+    "parallel-execution"
   ],
-  "author": "",
+  "author": "FORGE Contributors",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/[your-username]/forge.git"
+  },
+  "homepage": "https://github.com/[your-username]/forge",
+  "bugs": {
+    "url": "https://github.com/[your-username]/forge/issues"
+  },
   "dependencies": {
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
