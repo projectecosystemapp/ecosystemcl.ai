@@ -2,6 +2,7 @@ import { defineBackend } from '@aws-amplify/backend';
 import { auth } from './auth/resource';
 import { data } from './data/resource';
 import { storage } from './storage/resource';
+import { myFirstFunction } from './my-first-function/resource';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
@@ -19,6 +20,7 @@ const backend = defineBackend({
   auth,
   data,
   storage,
+  myFirstFunction,
 });
 
 // Get the underlying CDK stack
