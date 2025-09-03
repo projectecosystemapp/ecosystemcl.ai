@@ -42,7 +42,13 @@ export const auth = defineAuth({
     'custom:api_tier': {
       dataType: 'String',
       mutable: true,
-      default: 'free',
+      default: 'starter',
+    },
+    // Credit balance
+    'custom:credits': {
+      dataType: 'Number',
+      mutable: true,
+      default: '10000', // 10K free credits
     },
     // Connected services
     'custom:connected_services': {
@@ -62,17 +68,17 @@ export const auth = defineAuth({
   multifactor: {
     mode: 'OPTIONAL',
     totp: true,
-    sms: true,
+    sms: false, // Disable SMS for cost optimization
   },
   
   // Password policy
   passwordPolicy: {
-    minLength: 12,
+    minLength: 8,
     requireLowercase: true,
     requireUppercase: true,
     requireNumbers: true,
-    requireSymbols: true,
-    tempPasswordValidity: 3,
+    requireSymbols: false, // More user-friendly
+    tempPasswordValidity: 7, // 7 days for temp passwords
   },
   
   // Account recovery
