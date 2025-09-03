@@ -1,0 +1,450 @@
+#!/usr/bin/env node
+
+const { program } = require('commander');
+const { AuditPipeline } = require('../src/pipeline');
+const AgentDispatcher = require('../src/agentDispatcher');
+const chalk = require('chalk');
+const ora = require('ora');
+const inquirer = require('inquirer');
+const fs = require('fs').promises;
+const path = require('path');
+
+program
+  .name('forge')
+  .description('Autonomous multi-agent development orchestrator')
+  .version('1.0.0');
+
+/**
+ * Audit command - comprehensive codebase analysis and fixes
+ */
+program
+  .command('audit')
+  .description('Run comprehensive codebase audit with parallel agents')
+  .option('--fix-lint', 'Automatically fix linting issues')
+  .option('--analyze-logic', 'Deep logic analysis for bugs')
+  .option('--security-scan', 'Security vulnerability scanning')
+  .option('--migration-check', 'Check for Lambda URL migrations needed')
+  .option('--parallelism <n>', 'Number of parallel agents', '4')
+  .option('--mode <mode>', 'Execution mode: interactive or autonomous', 'interactive')
+  .action(async (options) => {
+    console.log(chalk.bold.cyan('\n🔥 ECOSYSTEMCL.AI AUDIT SYSTEM ACTIVATED\n'));
+    
+    // Check for previous sessions first
+    const sessionDir = '.forge/sessions';
+    let resumeSession = false;
+    let sessionToResume = null;
+    
+    try {
+      const sessions = await fs.readdir(sessionDir);
+      const sessionFiles = sessions.filter(f => f.endsWith('.json'));
+      
+      if (sessionFiles.length > 0 && options.mode === 'interactive') {
+        // Load and analyze recent sessions
+        const recentSessions = [];
+        
+        for (const file of sessionFiles.slice(-5)) { // Last 5 sessions
+          const sessionPath = path.join(sessionDir, file);
+          const data = JSON.parse(await fs.readFile(sessionPath, 'utf8'));
+          const age = Date.now() - new Date(data.timestamp).getTime();
+          
+          if (age < 86400000) { // Less than 24 hours old
+            recentSessions.push({
+              name: file,
+              sessionId: data.sessionId,
+              timestamp: data.timestamp,
+              completedTasks: data.completedTasks.length,
+              totalTasks: data.tasks.length,
+              age: Math.floor(age / 60000) // Age in minutes
+            });
+          }
+        }
+        
+        if (recentSessions.length > 0) {
+          console.log(chalk.yellow('\n⚠️  Previous sessions detected:\n'));
+          
+          recentSessions.forEach(session => {
+            console.log(chalk.gray(`   ${session.sessionId}`));
+            console.log(chalk.gray(`      Progress: ${session.completedTasks}/${session.totalTasks} tasks`));
+            console.log(chalk.gray(`      Age: ${session.age} minutes ago\n`));
+          });
+          
+          const { action } = await inquirer.prompt([{
+            type: 'list',
+            name: 'action',
+            message: 'What would you like to do?',
+            choices: [
+              { name: '🔄 Continue from most recent checkpoint', value: 'continue' },
+              { name: '🆕 Start fresh (delete previous sessions)', value: 'fresh' },
+              { name: '📋 View session details', value: 'details' },
+              { name: '❌ Cancel', value: 'cancel' }
+            ]
+          }]);
+          
+          if (action === 'continue') {
+            resumeSession = true;
+            sessionToResume = recentSessions[recentSessions.length - 1];
+            console.log(chalk.green(`\n✅ Resuming session: ${sessionToResume.sessionId}`));
+          } else if (action === 'fresh') {
+            // Clean up old sessions
+            for (const file of sessionFiles) {
+              await fs.unlink(path.join(sessionDir, file));
+            }
+            console.log(chalk.yellow('   Cleared previous sessions'));
+          } else if (action === 'details') {
+            // Show detailed session info
+            const { sessionChoice } = await inquirer.prompt([{
+              type: 'list',
+              name: 'sessionChoice',
+              message: 'Select a session to view:',
+              choices: recentSessions.map(s => ({
+                name: `${s.sessionId} (${s.completedTasks}/${s.totalTasks} tasks)`,
+                value: s.name
+              }))
+            }]);
+            
+            const sessionData = JSON.parse(await fs.readFile(path.join(sessionDir, sessionChoice), 'utf8'));
+            console.log(chalk.cyan('\n📊 Session Details:'));
+            console.log(JSON.stringify(sessionData, null, 2));
+            
+            const { continueChoice } = await inquirer.prompt([{
+              type: 'confirm',
+              name: 'continueChoice',
+              message: 'Resume this session?',
+              default: true
+            }]);
+            
+            if (continueChoice) {
+              resumeSession = true;
+              sessionToResume = recentSessions.find(s => s.name === sessionChoice);
+            } else {
+              process.exit(0);
+            }
+          } else {
+            console.log(chalk.red('Audit cancelled'));
+            process.exit(0);
+          }
+        }
+      }
+    } catch (error) {
+      // Session directory doesn't exist yet, continue normally
+    }
+    
+    const tasks = [];
+    
+    // Build task list based on options
+    if (options.fixLint) {
+      tasks.push(
+        { type: 'lint', target: 'app' },
+        { type: 'lint', target: 'components' },
+        { type: 'lint', target: 'amplify/functions' },
+        { type: 'lint', target: 'lib' }
+      );
+    }
+    
+    if (options.analyzeLogic) {
+      tasks.push(
+        { type: 'logic-analysis', target: 'amplify/functions/stripe-webhook' },
+        { type: 'logic-analysis', target: 'amplify/functions/booking-processor' },
+        { type: 'logic-analysis', target: 'app/api' },
+        { type: 'logic-analysis', target: 'lib' }
+      );
+    }
+    
+    if (options.securityScan) {
+      tasks.push(
+        { type: 'security', target: 'amplify/functions' },
+        { type: 'security', target: 'app/api' },
+        { type: 'security', target: 'amplify/data' }
+      );
+    }
+    
+    if (options.migrationCheck) {
+      tasks.push(
+        { type: 'migration-check', target: 'amplify/functions' },
+        { type: 'migration-check', target: 'lib' },
+        { type: 'migration-check', target: 'app' }
+      );
+    }
+    
+    if (tasks.length === 0) {
+      console.log(chalk.yellow('No audit tasks specified. Use --fix-lint, --analyze-logic, --security-scan, or --migration-check'));
+      process.exit(1);
+    }
+    
+    const pipeline = new AuditPipeline({
+      parallelism: parseInt(options.parallelism),
+      mode: options.mode
+    });
+    
+    try {
+      const spinner = ora('Initializing audit pipeline...').start();
+      const result = await pipeline.execute(tasks);
+      spinner.succeed('Audit complete!');
+      
+      if (result.conflicts.length > 0 && options.mode === 'interactive') {
+        console.log(chalk.yellow('\n⚠️  Conflicts detected. Manual review required.'));
+        console.log('Resolve conflicts in branch:', chalk.cyan(result.integrationBranch));
+      }
+      
+      process.exit(result.failed.length > 0 ? 1 : 0);
+    } catch (error) {
+      console.error(chalk.red(`\n❌ Audit failed: ${error.message}`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * Task command - execute arbitrary development task
+ */
+program
+  .command('task')
+  .argument('<description>', 'Natural language task description')
+  .description('Execute a development task using spec-driven workflow')
+  .option('--agent <agent>', 'Specific agent to use', 'spec-architect')
+  .action(async (description, options) => {
+    console.log(chalk.bold.cyan('\n🚀 ECOSYSTEMCL.AI TASK EXECUTION\n'));
+    console.log(chalk.gray('Task:'), description);
+    console.log(chalk.gray('Agent:'), options.agent);
+    
+    const dispatcher = new AgentDispatcher();
+    
+    try {
+      const spinner = ora('Processing task...').start();
+      
+      // Skip spec-architect for critical-code-reviewer
+      let spec = description;
+      if (options.agent !== 'spec-architect' && options.agent !== 'critical-code-reviewer') {
+        spinner.text = 'Getting specification...';
+        const specResult = await dispatcher.dispatch('spec-architect', description);
+        spec = specResult.raw;
+      }
+      
+      // Execute with specified agent
+      spinner.text = `Dispatching to ${options.agent}...`;
+      const result = await dispatcher.dispatch(options.agent, spec);
+      
+      spinner.succeed('Task completed!');
+      
+      console.log(chalk.green('\n✅ Result:'));
+      console.log(result.raw);
+      
+      if (result.fileChanges && result.fileChanges.length > 0) {
+        console.log(chalk.cyan('\n📝 Files changed:'));
+        result.fileChanges.forEach(change => {
+          console.log(`   ${change.action}: ${change.file}`);
+        });
+      }
+      
+    } catch (error) {
+      console.error(chalk.red(`\n❌ Task failed: ${error.message}`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * Migrate command - specialized Lambda URL migration
+ */
+program
+  .command('migrate <function-name>')
+  .description('Migrate a Lambda function from URL to AppSync')
+  .action(async (functionName) => {
+    console.log(chalk.bold.cyan('\n🔄 ECOSYSTEMCL.AI MIGRATION SYSTEM\n'));
+    console.log(chalk.gray('Migrating:'), functionName);
+    
+    const dispatcher = new AgentDispatcher();
+    
+    try {
+      const spinner = ora('Analyzing function...').start();
+      
+      const migrationPrompt = `
+        Migrate the Lambda function "${functionName}" from Lambda URL to AppSync pattern:
+        1. Update the handler to accept AppSyncResolverEvent
+        2. Add the mutation/query to amplify/data/resource.ts
+        3. Update lib/amplify-client-wrapper.ts with feature flag
+        4. Update all frontend calls to use the wrapper
+        5. Create tests for both legacy and new patterns
+      `;
+      
+      const result = await dispatcher.dispatch('legacy-modernization-specialist', migrationPrompt);
+      
+      spinner.succeed('Migration plan created!');
+      
+      console.log(chalk.green('\n✅ Migration completed:'));
+      console.log(result.raw);
+      
+    } catch (error) {
+      console.error(chalk.red(`\n❌ Migration failed: ${error.message}`));
+      process.exit(1);
+    }
+  });
+
+/**
+ * Agents command - list available agents
+ */
+program
+  .command('agents')
+  .description('List all available specialist agents')
+  .action(() => {
+    console.log(chalk.bold.cyan('\n🤖 Available Specialist Agents:\n'));
+    
+    const agents = [
+      { name: 'spec-architect', role: 'Specification and planning', emoji: '📋' },
+      { name: 'tdd-implementer', role: 'Test-driven development', emoji: '🧪' },
+      { name: 'critical-code-reviewer', role: 'Security and code review', emoji: '🔍' },
+      { name: 'legacy-modernization-specialist', role: 'Lambda URL to AppSync migration', emoji: '🔄' },
+      { name: 'devops-build-manager', role: 'Build and deployment', emoji: '🚀' },
+      { name: 'ui-architect-typescript', role: 'TypeScript UI development', emoji: '🎨' },
+      { name: 'marketplace-design-expert', role: 'Marketplace UX/UI design', emoji: '🛍️' }
+    ];
+    
+    agents.forEach(agent => {
+      console.log(`${agent.emoji}  ${chalk.cyan(agent.name)}`);
+      console.log(`   ${chalk.gray(agent.role)}\n`);
+    });
+  });
+
+/**
+ * Sessions command - manage audit sessions
+ */
+program
+  .command('sessions')
+  .description('Manage audit sessions and checkpoints')
+  .option('-l, --list', 'List all sessions')
+  .option('-c, --clean', 'Clean old sessions')
+  .option('-d, --details <sessionId>', 'Show session details')
+  .option('-r, --resume <sessionId>', 'Resume a specific session')
+  .action(async (options) => {
+    console.log(chalk.bold.cyan('\n📊 SESSION MANAGER\n'));
+    
+    const sessionDir = '.forge/sessions';
+    
+    try {
+      await fs.mkdir(sessionDir, { recursive: true });
+      const sessions = await fs.readdir(sessionDir);
+      const sessionFiles = sessions.filter(f => f.endsWith('.json'));
+      
+      if (options.list) {
+        if (sessionFiles.length === 0) {
+          console.log(chalk.yellow('No sessions found'));
+          return;
+        }
+        
+        console.log(chalk.cyan('Available sessions:\n'));
+        
+        for (const file of sessionFiles) {
+          const data = JSON.parse(await fs.readFile(path.join(sessionDir, file), 'utf8'));
+          const age = Date.now() - new Date(data.timestamp).getTime();
+          
+          console.log(chalk.white(`📁 ${data.sessionId}`));
+          console.log(chalk.gray(`   Created: ${new Date(data.timestamp).toLocaleString()}`));
+          console.log(chalk.gray(`   Progress: ${data.completedTasks.length}/${data.tasks.length} tasks`));
+          console.log(chalk.gray(`   Age: ${Math.floor(age / 3600000)} hours\n`));
+        }
+        
+      } else if (options.clean) {
+        const { confirm } = await inquirer.prompt([{
+          type: 'confirm',
+          name: 'confirm',
+          message: `Delete ${sessionFiles.length} session(s)?`,
+          default: false
+        }]);
+        
+        if (confirm) {
+          for (const file of sessionFiles) {
+            await fs.unlink(path.join(sessionDir, file));
+          }
+          console.log(chalk.green(`✅ Deleted ${sessionFiles.length} sessions`));
+        }
+        
+      } else if (options.details) {
+        const sessionFile = sessionFiles.find(f => f.includes(options.details));
+        
+        if (!sessionFile) {
+          console.log(chalk.red(`Session not found: ${options.details}`));
+          return;
+        }
+        
+        const data = JSON.parse(await fs.readFile(path.join(sessionDir, sessionFile), 'utf8'));
+        
+        console.log(chalk.cyan('Session Details:\n'));
+        console.log(chalk.white(`ID: ${data.sessionId}`));
+        console.log(chalk.white(`Created: ${new Date(data.timestamp).toLocaleString()}`));
+        console.log(chalk.white(`Mode: ${data.mode}`));
+        console.log(chalk.white(`Parallelism: ${data.parallelism}`));
+        console.log(chalk.white(`\nProgress: ${data.completedTasks.length}/${data.tasks.length} tasks`));
+        
+        if (data.completedTasks.length > 0) {
+          console.log(chalk.green('\nCompleted tasks:'));
+          data.completedTasks.forEach(task => {
+            console.log(chalk.gray(`   ✅ ${task}`));
+          });
+        }
+        
+        const pending = data.tasks.filter(t => !data.completedTasks.includes(t.id));
+        if (pending.length > 0) {
+          console.log(chalk.yellow('\nPending tasks:'));
+          pending.forEach(task => {
+            console.log(chalk.gray(`   ⏳ ${task.id || task.type}`));
+          });
+        }
+        
+      } else if (options.resume) {
+        const sessionFile = sessionFiles.find(f => f.includes(options.resume));
+        
+        if (!sessionFile) {
+          console.log(chalk.red(`Session not found: ${options.resume}`));
+          return;
+        }
+        
+        console.log(chalk.green(`\nResuming session: ${options.resume}`));
+        console.log(chalk.gray('Run the original audit command to continue'));
+        
+      } else {
+        // Interactive session management
+        if (sessionFiles.length === 0) {
+          console.log(chalk.yellow('No sessions found'));
+          return;
+        }
+        
+        const { action } = await inquirer.prompt([{
+          type: 'list',
+          name: 'action',
+          message: 'What would you like to do?',
+          choices: [
+            { name: '📋 List all sessions', value: 'list' },
+            { name: '🔍 View session details', value: 'details' },
+            { name: '🧹 Clean old sessions', value: 'clean' },
+            { name: '❌ Cancel', value: 'cancel' }
+          ]
+        }]);
+        
+        if (action === 'list') {
+          program.parse(['', '', 'sessions', '--list']);
+        } else if (action === 'details') {
+          const { session } = await inquirer.prompt([{
+            type: 'list',
+            name: 'session',
+            message: 'Select a session:',
+            choices: sessionFiles.map(f => {
+              const name = f.replace('.json', '');
+              return { name, value: name };
+            })
+          }]);
+          program.parse(['', '', 'sessions', '--details', session]);
+        } else if (action === 'clean') {
+          program.parse(['', '', 'sessions', '--clean']);
+        }
+      }
+      
+    } catch (error) {
+      console.error(chalk.red(`Error: ${error.message}`));
+    }
+  });
+
+// Parse arguments
+program.parse(process.argv);
+
+// Show help if no command provided
+if (!process.argv.slice(2).length) {
+  program.outputHelp();
+}

@@ -1,0 +1,33 @@
+# Ignore all log files
+logs/*
+!logs/.gitkeep
+
+# Ignore all generated artifacts
+artifacts/*
+!artifacts/.gitkeep
+
+# Ignore all cache files
+cache/*
+!cache/.gitkeep
+
+# Ignore embeddings (can be large)
+embeddings/*
+!embeddings/.gitkeep
+
+# Ignore local state snapshots
+state/*.snapshot
+state/*.backup
+
+# Ignore user-specific secrets
+*.local.yml
+*.secret
+.env.local
+
+# Ignore temporary files
+*.tmp
+*.swp
+*.swo
+*~
+
+# Ignore API keys
+api_keys.json

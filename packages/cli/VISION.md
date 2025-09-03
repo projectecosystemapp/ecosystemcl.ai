@@ -1,8 +1,8 @@
-# FORGE: Project Vision
+# ECOSYSTEMCL.AI: Project Vision
 
 ## Mission Statement
 
-To provide engineering teams with a powerful, reliable, and transparent orchestration layer for autonomous AI agents, transforming software development from a series of manual tasks into a supervised, automated workflow. FORGE is the command center that makes multi-agent development a practical reality.
+To provide engineering teams with a powerful, reliable, and transparent orchestration layer for autonomous AI agents, transforming software development from a series of manual tasks into a supervised, automated workflow. ECOSYSTEMCL.AI is the command center that makes multi-agent development a practical reality.
 
 ## Target Audience
 
@@ -21,7 +21,7 @@ The system defaults to full autonomy but provides a comprehensive, real-time aud
 All operations are built on Git primitives (branches, worktrees, merges, PRs). There is no proprietary state management. The git log is the record of truth.
 
 ### Extensibility First
-The core value of FORGE is its ability to coordinate *your* agents. The agent configuration system must remain simple, powerful, and easy to extend.
+The core value of ECOSYSTEMCL.AI is its ability to coordinate *your* agents. The agent configuration system must remain simple, powerful, and easy to extend.
 
 ### Resilience is Non-Negotiable
 Complex tasks will fail. The system is designed from the ground up to handle timeouts and errors through checkpointing and resumability.

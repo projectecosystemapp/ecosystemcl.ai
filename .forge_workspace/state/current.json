@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0",
+  "initialized_at": "2025-09-03T08:52:38Z",
+  "project": {
+    "name": "forge-standalone",
+    "path": "/Users/ryleebenson/Desktop/forge-standalone",
+    "type": "unknown",
+    "languages": [],
+    "frameworks": []
+  },
+  "architecture": {
+    "patterns": [],
+    "principles": [],
+    "constraints": []
+  },
+  "standards": {
+    "code_style": {},
+    "testing": {
+      "coverage_threshold": 80,
+      "required_types": ["unit", "integration"]
+    },
+    "security": {
+      "owasp_compliance": true,
+      "secrets_management": "environment_variables"
+    }
+  },
+  "history": [],
+  "decisions": [],
+  "learned_patterns": []
+}

@@ -1,14 +1,14 @@
-# FORGE
+# ECOSYSTEMCL.AI CLI
 
 **An Autonomous Multi-Agent Orchestrator for High-Performance Engineering Teams**
 
-FORGE is a command-line tool that acts as a foreman for a team of specialized AI agents, enabling them to perform complex, long-running software engineering tasks with full autonomy and traceability. It leverages Git-native parallelization and a resilient, observable architecture to automate codebase audits, feature implementation, and legacy modernization.
+ECOSYSTEMCL.AI is a command-line tool that acts as a foreman for a team of specialized AI agents, enabling them to perform complex, long-running software engineering tasks with full autonomy and traceability. It leverages Git-native parallelization and a resilient, observable architecture to automate codebase audits, feature implementation, and legacy modernization.
 
 ## Core Concepts
 
-**High-Autonomy Orchestration**: Give FORGE a high-level objective, and it decomposes the task, dispatches the right agents, and integrates their work into a single, clean pull request.
+**High-Autonomy Orchestration**: Give ECOSYSTEMCL.AI a high-level objective, and it decomposes the task, dispatches the right agents, and integrates their work into a single, clean pull request.
 
-**Parallel Execution Engine**: FORGE uses `git worktree` to create isolated environments for each agent, allowing multiple specialists to work on the codebase simultaneously without conflict.
+**Parallel Execution Engine**: ECOSYSTEMCL.AI uses `git worktree` to create isolated environments for each agent, allowing multiple specialists to work on the codebase simultaneously without conflict.
 
 **Resilient & Observable**: With real-time structured logging, you can see every step of an agent's thought process. Session checkpointing and resumability mean that even long-running tasks can survive timeouts and interruptions.
 

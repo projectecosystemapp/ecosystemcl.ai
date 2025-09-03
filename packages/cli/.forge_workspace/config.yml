@@ -1,0 +1,38 @@
+# ECOSYSTEMCL.AI Workspace Configuration
+# This file defines the local workspace settings for this project
+
+version: "1.0.0"
+project_name: "cli"
+initialized_at: "2025-09-03T09:26:38Z"
+
+# Agent execution settings
+execution:
+  timeout: 900000  # 15 minutes default
+  max_retries: 3
+  parallel_agents: 4
+
+# Memory settings
+memory:
+  cache_ttl: 86400  # 24 hours
+  max_log_size: 104857600  # 100MB
+  state_snapshots: 10  # Keep last 10 state snapshots
+
+# Security settings
+security:
+  sandbox_mode: true
+  allow_network: true
+  allow_file_write: true
+  restricted_paths:
+    - "/etc"
+    - "/sys"
+    - "/proc"
+    - "~/.ssh"
+
+# Integration settings
+integrations:
+  github:
+    enabled: true
+    auto_commit: false
+  supabase:
+    sync_state: true
+    sync_interval: 300  # 5 minutes

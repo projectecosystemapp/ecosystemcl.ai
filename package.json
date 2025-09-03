@@ -1,51 +1,20 @@
 {
-  "name": "forge-orchestrator",
+  "name": "forge-standalone",
   "version": "1.0.0",
-  "description": "An Autonomous Multi-Agent Orchestrator for High-Performance Engineering Teams",
-  "main": "src/index.js",
-  "bin": {
-    "forge": "./bin/forge"
-  },
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "lint": "eslint src/**/*.js",
-    "install-global": "npm link",
-    "uninstall-global": "npm unlink"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter './packages/*' build",
+    "lint": "pnpm --filter './packages/*' lint"
   },
-  "keywords": [
-    "ai",
-    "multi-agent",
-    "orchestration",
-    "autonomous",
-    "claude",
-    "development",
-    "automation",
-    "git",
-    "worktree",
-    "parallel-execution"
-  ],
-  "author": "FORGE Contributors",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/[your-username]/forge.git"
-  },
-  "homepage": "https://github.com/[your-username]/forge",
-  "bugs": {
-    "url": "https://github.com/[your-username]/forge/issues"
-  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.15.1",
   "dependencies": {
-    "chalk": "^4.1.2",
-    "commander": "^11.1.0",
-    "inquirer": "^8.2.6",
-    "js-yaml": "^4.1.0",
-    "ora": "^5.4.1"
-  },
-  "devDependencies": {
-    "eslint": "^8.54.0",
-    "jest": "^29.7.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "bullmq": "^5.58.4",
+    "ioredis": "^5.7.0"
   }
 }

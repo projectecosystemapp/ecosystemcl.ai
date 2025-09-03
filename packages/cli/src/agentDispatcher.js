@@ -7,12 +7,52 @@ const { exec, spawn } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
 const chalk = require('chalk');
+const axios = require('axios');
+const { EventSource } = require('eventsource');
+const os = require('os');
 
 class AgentDispatcher {
   constructor() {
     this.agentsDir = path.resolve(__dirname, '..', 'agents');
     this.agentCache = new Map();
     this.activeStreams = new Map();
+    this.configFile = path.join(os.homedir(), '.forge', 'credentials.json');
+    this.apiUrl = process.env.FORGE_API_URL || 'https://forge.app';
+    this.platformMode = null; // Will be determined on first run
+  }
+
+  /**
+   * Check if user is authenticated with the platform
+   */
+  async isPlatformAuthenticated() {
+    try {
+      const data = await fs.readFile(this.configFile, 'utf8');
+      const creds = JSON.parse(data);
+      
+      // Check if token exists and is not expired
+      if (!creds || !creds.access_token) return false;
+      
+      if (creds.expires_at && new Date(creds.expires_at) < new Date()) {
+        return false; // Token expired
+      }
+      
+      return true;
+    } catch (error) {
+      return false; // No credentials file or error reading it
+    }
+  }
+
+  /**
+   * Get platform access token
+   */
+  async getPlatformToken() {
+    try {
+      const data = await fs.readFile(this.configFile, 'utf8');
+      const creds = JSON.parse(data);
+      return creds.access_token;
+    } catch (error) {
+      return null;
+    }
   }
 
   /**
@@ -255,6 +295,153 @@ REMINDER: You MUST follow the LOG BLOCK format for every action. Each block must
   }
 
   /**
+   * Execute agent through platform API
+   */
+  async executePlatformAgent(agentName, taskPrompt, context, token) {
+    console.log(chalk.cyan('🌐 Executing through ECOSYSTEMCL.AI platform...'));
+    
+    try {
+      // Make API request to platform
+      const response = await axios.post(
+        `${this.apiUrl}/api/forge/agent/execute`,
+        {
+          agentName,
+          taskPrompt,
+          context,
+          authMethod: 'platform',
+          streaming: true,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          }
+        }
+      );
+
+      const { job, streaming: streamingInfo } = response.data;
+      console.log(chalk.green(`✅ Job queued: ${job.id}`));
+      
+      if (streamingInfo && streamingInfo.url) {
+        // Connect to SSE stream
+        await this.connectToStream(job.id, streamingInfo.url, token);
+      } else {
+        // Fallback to polling
+        await this.pollJobStatus(job.id, token);
+      }
+      
+      return {
+        success: true,
+        jobId: job.id,
+        platform: true,
+      };
+    } catch (error) {
+      if (error.response?.status === 401) {
+        console.log(chalk.yellow('⚠️  Platform authentication expired. Falling back to local mode...'));
+        throw new Error('AUTH_EXPIRED');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Connect to SSE stream for real-time output
+   */
+  async connectToStream(jobId, streamUrl, token) {
+    return new Promise((resolve, reject) => {
+      console.log(chalk.gray(`Connecting to stream: ${streamUrl}`));
+      
+      const eventSource = new EventSource(`${this.apiUrl}${streamUrl}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          
+          if (data.type === 'LOG_BLOCK') {
+            this.displayLogBlock(data.block, data.agentName || 'Agent');
+          } else if (data.type === 'status') {
+            if (data.status === 'completed') {
+              console.log(chalk.green('✅ Agent completed'));
+              eventSource.close();
+              resolve(data);
+            } else if (data.status === 'failed') {
+              console.error(chalk.red('❌ Agent failed:', data.error));
+              eventSource.close();
+              reject(new Error(data.error));
+            }
+          } else if (data.type === 'output') {
+            process.stdout.write(data.content);
+          }
+        } catch (e) {
+          console.error('Failed to parse stream data:', e);
+        }
+      };
+
+      eventSource.onerror = (error) => {
+        console.error(chalk.red('Stream error:', error));
+        eventSource.close();
+        reject(error);
+      };
+
+      // Store reference for cancellation
+      this.activeStreams.set(jobId, eventSource);
+    });
+  }
+
+  /**
+   * Poll job status (fallback when streaming not available)
+   */
+  async pollJobStatus(jobId, token) {
+    const pollInterval = 2000; // 2 seconds
+    const maxPolls = 450; // 15 minutes total
+    let polls = 0;
+
+    while (polls < maxPolls) {
+      try {
+        const response = await axios.get(
+          `${this.apiUrl}/api/forge/agent/execute?jobId=${jobId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            }
+          }
+        );
+
+        const { job } = response.data;
+        
+        if (job.status === 'completed') {
+          console.log(chalk.green('✅ Job completed'));
+          
+          // Display any log blocks
+          if (job.job_logs) {
+            job.job_logs
+              .filter(log => log.is_structured && log.block_type === 'LOG_BLOCK')
+              .forEach(log => {
+                this.displayLogBlock(log.block_data, 'Agent');
+              });
+          }
+          
+          return job;
+        } else if (job.status === 'failed') {
+          throw new Error(`Job failed: ${job.error || 'Unknown error'}`);
+        }
+
+        polls++;
+        await new Promise(resolve => setTimeout(resolve, pollInterval));
+      } catch (error) {
+        console.error(chalk.red('Polling error:', error.message));
+        throw error;
+      }
+    }
+
+    throw new Error('Job timed out');
+  }
+
+  /**
    * Main dispatch method with streaming support
    */
   async dispatch(agentName, taskPrompt, options = {}) {
@@ -264,7 +451,8 @@ REMINDER: You MUST follow the LOG BLOCK format for every action. Each block must
       streaming = true,
       onLogBlock = null,
       timeout = 900000, // 15 minutes default
-      retries = 1
+      retries = 1,
+      forceLocal = false // Option to force local execution
     } = options;
 
     console.log(chalk.bold.cyan(`\n📋 Dispatching task to ${agentName}`));
@@ -273,6 +461,35 @@ REMINDER: You MUST follow the LOG BLOCK format for every action. Each block must
     console.log(chalk.gray(`   Streaming: ${streaming ? 'enabled' : 'disabled'}`));
     
     try {
+      // Check if platform mode should be used (unless forced to local)
+      if (!forceLocal) {
+        const isPlatformAuth = await this.isPlatformAuthenticated();
+        if (isPlatformAuth) {
+          const token = await this.getPlatformToken();
+          if (token) {
+            try {
+              // Try platform execution
+              const result = await this.executePlatformAgent(agentName, taskPrompt, {
+                files,
+                workingDirectory,
+              }, token);
+              
+              return result;
+            } catch (error) {
+              if (error.message === 'AUTH_EXPIRED') {
+                console.log(chalk.yellow('⚠️  Falling back to local execution...'));
+                // Continue with local execution
+              } else {
+                throw error;
+              }
+            }
+          }
+        }
+      }
+      
+      // Local execution path
+      console.log(chalk.gray('🖥️  Executing locally with Claude CLI...'));
+      
       // Load agent configuration
       const agentConfig = await this.loadAgentConfig(agentName);
       

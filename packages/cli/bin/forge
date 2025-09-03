@@ -1,18 +1,373 @@
 #!/usr/bin/env node
 
+require('dotenv').config();
+
 const { program } = require('commander');
 const { AuditPipeline } = require('../src/pipeline');
 const AgentDispatcher = require('../src/agentDispatcher');
+const ForgeAuth = require('../src/auth');
 const chalk = require('chalk');
 const ora = require('ora');
 const inquirer = require('inquirer');
 const fs = require('fs').promises;
 const path = require('path');
+const { exec } = require('child_process');
+const { promisify } = require('util');
+const execAsync = promisify(exec);
+const axios = require('axios');
+const { EventSource } = require('eventsource');
+
+const auth = new ForgeAuth();
 
 program
   .name('forge')
   .description('Autonomous multi-agent development orchestrator')
   .version('1.0.0');
+
+/**
+ * Login command - authenticate with ECOSYSTEMCL.AI platform
+ */
+program
+  .command('login')
+  .description('Authenticate with the ECOSYSTEMCL.AI platform')
+  .action(async () => {
+    try {
+      await auth.login();
+    } catch (error) {
+      console.error(chalk.red('Authentication failed:'), error.message);
+      process.exit(1);
+    }
+  });
+
+/**
+ * Logout command
+ */
+program
+  .command('logout')
+  .description('Log out from the ECOSYSTEMCL.AI platform')
+  .action(async () => {
+    try {
+      await auth.logout();
+    } catch (error) {
+      console.error(chalk.red('Logout failed:'), error.message);
+      process.exit(1);
+    }
+  });
+
+/**
+ * Status command - show authentication status
+ */
+program
+  .command('status')
+  .description('Show authentication and connection status')
+  .action(async () => {
+    try {
+      await auth.status();
+    } catch (error) {
+      console.error(chalk.red('Error:'), error.message);
+      process.exit(1);
+    }
+  });
+
+/**
+ * Connect command - connect external services
+ */
+program
+  .command('connect <service>')
+  .description('Connect an external service (claude, openai, github, google, aws)')
+  .action(async (service) => {
+    try {
+      await auth.connectService(service);
+    } catch (error) {
+      console.error(chalk.red(`Failed to connect ${service}:`), error.message);
+      process.exit(1);
+    }
+  });
+
+/**
+ * Plan command - submit a high-level goal to MCP and stream progress
+ */
+program
+  .command('plan [goal]')
+  .description('Submit a goal for MCP planning and execution (optionally from a prompt file)')
+  .option('--prompt-file <path>', 'Path to a prompt file (Markdown)')
+  .option('--workspace <id>', 'Workspace ID for context')
+  .option('--no-stream', 'Do not stream; just submit and exit')
+  .option('--detach', 'Alias for --no-stream')
+  .action(async (goal, options) => {
+    try {
+      const apiUrl = process.env.FORGE_API_URL || 'https://forge.app';
+
+      // Determine goal text
+      let finalGoal = goal || '';
+      if (options.promptFile) {
+        const p = path.resolve(process.cwd(), options.promptFile);
+        finalGoal = await fs.readFile(p, 'utf8');
+      }
+      if (!finalGoal) {
+        console.log(chalk.red('Error: You must provide a goal or --prompt-file'));
+        process.exit(1);
+      }
+
+      // Ensure auth
+      const token = await auth.getAccessToken();
+      if (!token) {
+        console.log(chalk.yellow('⚠️  Not authenticated. Run "forge login" first.'));
+        process.exit(1);
+      }
+
+      console.log(chalk.bold.cyan('\n🧭 Submitting plan to MCP...'));
+      const res = await axios.post(
+        `${apiUrl}/api/forge/execute`,
+        {
+          goal: finalGoal,
+          workspaceId: options.workspace || null,
+          executionMode: 'mcp'
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      const data = res.data || {};
+      if (!data.success) {
+        console.log(chalk.red('❌ Plan submission failed'));
+        console.log(chalk.gray(JSON.stringify(data, null, 2)));
+        process.exit(1);
+      }
+
+      const plan = data.plan || {};
+      console.log(chalk.green(`✅ Plan created: ${plan.id}`));
+      if (options.detach === true || options.stream === false) {
+        console.log(chalk.gray('Detached. Use the Web UI to monitor execution.'));
+        return;
+      }
+
+      const streaming = data.streaming || data.websocketUrl || data.websocketURL || null;
+      let streamPath = null;
+      if (streaming && typeof streaming === 'object' && streaming.url) {
+        streamPath = streaming.url;
+      } else if (typeof streaming === 'string') {
+        streamPath = streaming;
+      }
+
+      if (!streamPath) {
+        console.log(chalk.yellow('ℹ️  No stream URL returned. Plan queued.'));
+        return;
+      }
+
+      console.log(chalk.gray(`Connecting to stream: ${apiUrl}${streamPath}`));
+      const es = new EventSource(`${apiUrl}${streamPath}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const onSigint = async () => {
+        console.log('\n');
+        console.log(chalk.yellow('Cancelling plan (Ctrl+C)...'));
+        es.close();
+        try {
+          await axios.post(`${apiUrl}/api/forge/cancel`, { planId: plan.id }, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          console.log(chalk.green('✅ Cancel requested'));
+        } catch (e) {
+          console.log(chalk.gray('Cancel endpoint not available yet.'));
+        } finally {
+          process.exit(130);
+        }
+      };
+      process.on('SIGINT', onSigint);
+
+      es.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          if (payload.type === 'LOG_BLOCK') {
+            console.log(chalk.gray('─'.repeat(80)));
+            console.log(chalk.cyan.bold(`[${payload.agentName || 'Agent'}] LOG BLOCK`));
+            const b = payload.block || {};
+            if (b.thinking) console.log(chalk.yellow('Thinking:'), b.thinking);
+            if (b.reasoning) console.log(chalk.magenta('Reasoning:'), b.reasoning);
+            if (b.reference) console.log(chalk.blue('Reference:'), b.reference);
+            if (b.action) console.log(chalk.green('Action:'), b.action);
+            if (b.result) console.log(chalk.white('Result:'), b.result);
+          } else if (payload.type === 'log') {
+            console.log(payload.message);
+          } else if (payload.type === 'status') {
+            console.log(chalk.gray(`Status: ${payload.status}`));
+            if (payload.status === 'completed' || payload.status === 'failed' || payload.status === 'cancelled') {
+              es.close();
+              process.removeListener('SIGINT', onSigint);
+            }
+          }
+        } catch (e) {
+          // Ignore parse errors
+        }
+      };
+
+      es.onerror = (err) => {
+        console.error(chalk.red('Stream error'), err.message || err);
+      };
+
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        // Try token refresh via CLI helper
+        const creds = await auth.loadCredentials();
+        if (creds?.refresh_token) {
+          const refreshed = await auth.refreshToken(creds.refresh_token);
+          if (refreshed) {
+            console.log(chalk.gray('Retried after token refresh; please re-run your command.'));
+            process.exit(1);
+          }
+        }
+      }
+      console.error(chalk.red('Plan command failed:'), error.message);
+      process.exit(1);
+    }
+  });
+
+/**
+ * Init command - initialize FORGE workspace with authentication
+ */
+program
+  .command('init')
+  .description('Initialize an ECOSYSTEMCL.AI workspace in the current directory')
+  .option('-f, --force', 'Force initialization even if workspace exists')
+  .action(async (options) => {
+    console.log(chalk.blue.bold('\n🚀 ECOSYSTEMCL.AI Workspace Initialization\n'));
+    
+    // Check authentication first
+    const isAuth = await auth.isAuthenticated();
+    if (!isAuth) {
+      console.log(chalk.yellow('⚠️  You need to authenticate first\n'));
+      const { doLogin } = await inquirer.prompt([{
+        type: 'confirm',
+        name: 'doLogin',
+        message: 'Would you like to login now?',
+        default: true
+      }]);
+      
+      if (doLogin) {
+        await auth.login();
+      } else {
+        console.log(chalk.gray('Run "forge login" when ready'));
+        process.exit(0);
+      }
+    }
+    
+    // Check for existing workspace
+    const workspaceDir = '.forge_workspace';
+    try {
+      await fs.access(workspaceDir);
+      if (!options.force) {
+        const { overwrite } = await inquirer.prompt([{
+          type: 'confirm',
+          name: 'overwrite',
+          message: 'Workspace already exists. Reinitialize?',
+          default: false
+        }]);
+        
+        if (!overwrite) {
+          console.log(chalk.gray('Initialization cancelled'));
+          process.exit(0);
+        }
+      }
+    } catch {}
+    
+    // Get connected services
+    const creds = await auth.loadCredentials();
+    const connectedServices = creds?.connected_services || {};
+    
+    if (Object.keys(connectedServices).length === 0) {
+      console.log(chalk.yellow('\n⚠️  No services connected yet\n'));
+      console.log(chalk.gray('Recommended services:'));
+      console.log(chalk.gray('  • Claude (forge connect claude) - For planning and review'));
+      console.log(chalk.gray('  • OpenAI (forge connect openai) - For code generation'));
+      console.log(chalk.gray('  • GitHub (forge connect github) - For repository access\n'));
+      
+      const { connectNow } = await inquirer.prompt([{
+        type: 'confirm',
+        name: 'connectNow',
+        message: 'Would you like to connect services now?',
+        default: true
+      }]);
+      
+      if (connectNow) {
+        const { servicesToConnect } = await inquirer.prompt([{
+          type: 'checkbox',
+          name: 'servicesToConnect',
+          message: 'Select services to connect:',
+          choices: [
+            { name: 'Claude', value: 'claude', checked: true },
+            { name: 'OpenAI', value: 'openai', checked: true },
+            { name: 'GitHub', value: 'github', checked: true },
+            { name: 'Google Cloud', value: 'google' },
+            { name: 'AWS', value: 'aws' }
+          ]
+        }]);
+        
+        for (const service of servicesToConnect) {
+          console.log(chalk.blue(`\nConnecting ${service}...`));
+          await auth.connectService(service);
+        }
+      }
+    }
+    
+    // Run the initialization script
+    const spinner = ora('Initializing workspace...').start();
+    
+    try {
+      const scriptPath = path.join(__dirname, '..', '..', '..', 'scripts', 'forge_init.sh');
+      const { stdout, stderr } = await execAsync(`bash "${scriptPath}"`);
+      
+      if (stderr && !stderr.includes('already exists')) {
+        console.warn(chalk.yellow('\nWarnings:'), stderr);
+      }
+      
+      spinner.succeed('Workspace initialized!');
+      
+      // Update agent configs with connected services
+      if (Object.keys(connectedServices).length > 0) {
+        console.log(chalk.blue('\n📝 Configuring agents with connected services...'));
+        
+        const agentsDir = path.join(workspaceDir, 'agents');
+        const agentFiles = await fs.readdir(agentsDir);
+        
+        for (const file of agentFiles) {
+          if (!file.endsWith('.yml')) continue;
+          
+          const agentPath = path.join(agentsDir, file);
+          let config = await fs.readFile(agentPath, 'utf8');
+          
+          // Update model IDs based on connected services
+          if (connectedServices.claude && config.includes('claude-')) {
+            config = config.replace(/model_id: ".*"/, 'model_id: "claude-3-opus-20240229" # Via ECOSYSTEMCL.AI platform');
+          } else if (connectedServices.openai && config.includes('gpt-')) {
+            config = config.replace(/model_id: ".*"/, 'model_id: "gpt-4o" # Via ECOSYSTEMCL.AI platform');
+          }
+          
+          // Add auth method indicator
+          if (!config.includes('auth_method')) {
+            config += '\nauth_method: "forge_platform" # Credentials managed securely by ECOSYSTEMCL.AI\n';
+          }
+          
+          await fs.writeFile(agentPath, config);
+        }
+        
+        console.log(chalk.green('✅ Agents configured with platform authentication'));
+      }
+      
+      console.log(chalk.green.bold('\n✅ Workspace ready!'));
+      console.log(chalk.gray('\nNext steps:'));
+      console.log(chalk.gray('  1. Review agent configurations in .forge_workspace/agents/'));
+      console.log(chalk.gray('  2. Customize system prompts in .forge_workspace/agents/prompts/'));
+      console.log(chalk.gray('  3. Run your first audit: forge audit --security-scan'));
+      
+    } catch (error) {
+      spinner.fail('Initialization failed');
+      console.error(chalk.red('Error:'), error.message);
+      process.exit(1);
+    }
+  });
 
 /**
  * Audit command - comprehensive codebase analysis and fixes
@@ -27,7 +382,7 @@ program
   .option('--parallelism <n>', 'Number of parallel agents', '4')
   .option('--mode <mode>', 'Execution mode: interactive or autonomous', 'interactive')
   .action(async (options) => {
-    console.log(chalk.bold.cyan('\n🔥 FORGE AUDIT SYSTEM ACTIVATED\n'));
+    console.log(chalk.bold.cyan('\n🔥 ECOSYSTEMCL.AI AUDIT SYSTEM ACTIVATED\n'));
     
     // Check for previous sessions first
     const sessionDir = '.forge/sessions';
@@ -202,7 +557,7 @@ program
   .description('Execute a development task using spec-driven workflow')
   .option('--agent <agent>', 'Specific agent to use', 'spec-architect')
   .action(async (description, options) => {
-    console.log(chalk.bold.cyan('\n🚀 FORGE TASK EXECUTION\n'));
+    console.log(chalk.bold.cyan('\n🚀 ECOSYSTEMCL.AI TASK EXECUTION\n'));
     console.log(chalk.gray('Task:'), description);
     console.log(chalk.gray('Agent:'), options.agent);
     
@@ -248,7 +603,7 @@ program
   .command('migrate <function-name>')
   .description('Migrate a Lambda function from URL to AppSync')
   .action(async (functionName) => {
-    console.log(chalk.bold.cyan('\n🔄 FORGE MIGRATION SYSTEM\n'));
+    console.log(chalk.bold.cyan('\n🔄 ECOSYSTEMCL.AI MIGRATION SYSTEM\n'));
     console.log(chalk.gray('Migrating:'), functionName);
     
     const dispatcher = new AgentDispatcher();
