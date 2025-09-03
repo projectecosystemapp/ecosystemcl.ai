@@ -1,0 +1,39 @@
+{
+  "sessionId": "audit-1756879550655-6d67607d",
+  "timestamp": "2025-09-03T06:05:50.655Z",
+  "tasks": [
+    {
+      "type": "logic-analysis",
+      "target": "amplify/functions/stripe-webhook"
+    },
+    {
+      "type": "logic-analysis",
+      "target": "amplify/functions/booking-processor"
+    },
+    {
+      "type": "logic-analysis",
+      "target": "app/api"
+    },
+    {
+      "type": "logic-analysis",
+      "target": "lib"
+    },
+    {
+      "type": "security",
+      "target": "amplify/functions"
+    },
+    {
+      "type": "security",
+      "target": "app/api"
+    },
+    {
+      "type": "security",
+      "target": "amplify/data"
+    }
+  ],
+  "completedTasks": [],
+  "worktrees": [],
+  "results": [],
+  "parallelism": 4,
+  "mode": "interactive"
+}
