@@ -20,3 +20,10 @@ applications:
         paths:
           - node_modules/**/*
           - packages/web/node_modules/**/*
+    backend:
+      phases:
+        build:
+          commands:
+            - cd packages/web/amplify
+            - npm ci
+            - npm run build
