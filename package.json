@@ -14,7 +14,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.15.1",
   "dependencies": {
-    "bullmq": "^5.58.4",
-    "ioredis": "^5.7.0"
+    "@aws-amplify/backend": "^1.0.0",
+    "@aws-amplify/backend-cli": "^1.0.0"
   }
 }

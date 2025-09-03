@@ -16,8 +16,8 @@ class AgentDispatcher {
     this.agentsDir = path.resolve(__dirname, '..', 'agents');
     this.agentCache = new Map();
     this.activeStreams = new Map();
-    this.configFile = path.join(os.homedir(), '.forge', 'credentials.json');
-    this.apiUrl = process.env.FORGE_API_URL || 'https://forge.app';
+    this.configFile = path.join(os.homedir(), '.ecosystemcli', 'credentials.json');
+    this.apiUrl = process.env.ECOSYSTEMCLI_API_URL || 'https://forge.app';
     this.platformMode = null; // Will be determined on first run
   }
 

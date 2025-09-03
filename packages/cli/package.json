@@ -1,10 +1,10 @@
 {
-  "name": "forge-orchestrator",
+  "name": "ecosystem-cli",
   "version": "1.0.0",
   "description": "An Autonomous Multi-Agent Orchestrator for High-Performance Engineering Teams",
   "main": "src/index.js",
   "bin": {
-    "forge": "./bin/forge"
+    "ecosystemcli": "./bin/ecosystemcli"
   },
   "scripts": {
     "test": "jest",

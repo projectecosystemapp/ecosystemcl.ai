@@ -1,1 +1,72 @@
-node_modules
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Production
+*.prod.js
+
+# Misc
+.DS_Store
+*.pem
+.vscode/
+.idea/
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# TypeScript
+*.tsbuildinfo
+
+# AWS Amplify
+amplify/.config/local-*
+amplify/logs
+amplify/mock-data
+amplify/backend/amplify-meta.json
+amplify/backend/.temp
+amplify/#current-cloud-backend
+amplify/.config/project-config.json
+amplify/generated/
+amplify_outputs.json
+.amplify/
+
+# AWS credentials
+.aws/
+
+# IDE
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Local workspace
+.eco_workspace/
+.ecosystemcli/
+.forge/
+.forge_workspace/
+
+# Secrets
+**/credentials.json
+**/*.pem
+**/*.key

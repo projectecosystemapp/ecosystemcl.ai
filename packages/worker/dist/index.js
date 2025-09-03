@@ -6,7 +6,7 @@ const lib_1 = require("./lib");
 const processor_1 = require("./processor");
 const QUEUE_NAME = 'forge-jobs';
 const WORKER_ID = `worker-${process.pid}-${Date.now()}`;
-console.log(`[Worker ${WORKER_ID}] Starting FORGE worker service...`);
+console.log(`[Worker ${WORKER_ID}] Starting ECOSYSTEMCL.AI worker service...`);
 // Create the worker that processes jobs
 const worker = new bullmq_1.Worker(QUEUE_NAME, processor_1.processForgeJob, {
     connection: lib_1.redisConnection.duplicate(),

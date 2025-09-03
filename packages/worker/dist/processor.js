@@ -33,7 +33,7 @@ function parseDockerStream(buffer) {
     }
     return output;
 }
-// Process structured LOG BLOCKS from forge output
+// Process structured LOG BLOCKS from ECOSYSTEMCL.AI output
 function parseLogBlock(message) {
     const logBlockRegex = /\[LOG BLOCK\]([\s\S]*?)\[END LOG BLOCK\]/;
     const match = message.match(logBlockRegex);

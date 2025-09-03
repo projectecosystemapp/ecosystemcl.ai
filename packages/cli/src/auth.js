@@ -9,11 +9,11 @@ const os = require('os');
 const crypto = require('crypto');
 const inquirer = require('inquirer');
 
-class ForgeAuth {
+class EcosystemAuth {
   constructor() {
-    this.configDir = path.join(os.homedir(), '.forge');
+    this.configDir = path.join(os.homedir(), '.ecosystemcli');
     this.configFile = path.join(this.configDir, 'credentials.json');
-    this.apiUrl = process.env.FORGE_API_URL || 'https://forge.app';
+    this.apiUrl = process.env.ECOSYSTEMCLI_API_URL || 'http://localhost:3000';
   }
 
   /**
@@ -495,4 +495,4 @@ class ForgeAuth {
   }
 }
 
-module.exports = ForgeAuth;
+module.exports = EcosystemAuth;

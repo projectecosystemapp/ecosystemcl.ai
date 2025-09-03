@@ -14,16 +14,16 @@ export default function DeviceAuthPage() {
   const router = useRouter();
   const { isLoaded, isSignedIn, user } = useUser();
   
-  const [deviceCode, setDeviceCode] = useState('');
+  const [userCode, setUserCode] = useState('');
   const [inputCode, setInputCode] = useState('');
   const [status, setStatus] = useState<'input' | 'authorizing' | 'success' | 'error'>('input');
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Get code from URL if provided
-    const codeParam = searchParams.get('code');
+    // Get user_code from URL if provided
+    const codeParam = searchParams.get('user_code');
     if (codeParam) {
-      setDeviceCode(codeParam);
+      setUserCode(codeParam);
       setInputCode(codeParam);
     }
   }, [searchParams]);
@@ -37,8 +37,8 @@ export default function DeviceAuthPage() {
   }, [isLoaded, isSignedIn, router]);
 
   const handleAuthorize = async () => {
-    if (!inputCode || inputCode.length !== 6) {
-      setError('Please enter a valid 6-character device code');
+    if (!inputCode || inputCode.length !== 9) { // Format: XXXX-XXXX
+      setError('Please enter a valid device code (format: XXXX-XXXX)');
       return;
     }
 
@@ -46,18 +46,13 @@ export default function DeviceAuthPage() {
     setError('');
 
     try {
-      // Get state from URL
-      const state = searchParams.get('state') || '';
-      
-      // Create access token for CLI
+      // Authorize the device using the user code
       const response = await fetch('/api/device-auth/authorize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          device_code: inputCode.toUpperCase(),
-          state,
-          user_id: user?.id,
-          user_email: user?.primaryEmailAddress?.emailAddress,
+          user_code: inputCode.toUpperCase(),
+          action: 'approve',
         }),
       });
 
@@ -108,10 +103,16 @@ export default function DeviceAuthPage() {
                 <Input
                   type="text"
                   value={inputCode}
-                  onChange={(e) => setInputCode(e.target.value.toUpperCase())}
-                  placeholder="ABC123"
+                  onChange={(e) => {
+                    let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    if (value.length > 4) {
+                      value = value.slice(0, 4) + '-' + value.slice(4, 8);
+                    }
+                    setInputCode(value);
+                  }}
+                  placeholder="XXXX-XXXX"
                   className="text-center text-2xl font-mono tracking-wider"
-                  maxLength={6}
+                  maxLength={9}
                   autoFocus
                 />
               </div>
@@ -126,7 +127,7 @@ export default function DeviceAuthPage() {
                 onClick={handleAuthorize}
                 className="w-full"
                 size="lg"
-                disabled={inputCode.length !== 6}
+                disabled={inputCode.length !== 9}
               >
                 Authorize CLI Access
               </Button>

@@ -31,12 +31,12 @@ Visit [ecosystemcl.ai](https://ecosystemcl.ai) to use the browser-based interfac
 
 1. **Authenticate**
    ```bash
-   forge auth login
+   ecosystemcli login
    ```
 
 2. **Run Your First Task**
    ```bash
-   forge task "Build a React dashboard with authentication"
+   ecosystemcli plan "Build a React dashboard with authentication"
    ```
 
 3. **Watch the Magic**

@@ -5,7 +5,7 @@ require('dotenv').config();
 const { program } = require('commander');
 const { AuditPipeline } = require('../src/pipeline');
 const AgentDispatcher = require('../src/agentDispatcher');
-const ForgeAuth = require('../src/auth');
+const EcosystemAuth = require('../src/auth');
 const chalk = require('chalk');
 const ora = require('ora');
 const inquirer = require('inquirer');
@@ -17,10 +17,10 @@ const execAsync = promisify(exec);
 const axios = require('axios');
 const { EventSource } = require('eventsource');
 
-const auth = new ForgeAuth();
+const auth = new EcosystemAuth();
 
 program
-  .name('forge')
+  .name('ecosystemcli')
   .description('Autonomous multi-agent development orchestrator')
   .version('1.0.0');
 
@@ -112,7 +112,7 @@ program
       // Ensure auth
       const token = await auth.getAccessToken();
       if (!token) {
-        console.log(chalk.yellow('⚠️  Not authenticated. Run "forge login" first.'));
+        console.log(chalk.yellow('⚠️  Not authenticated. Run "ecosystemcli login" first.'));
         process.exit(1);
       }
 
@@ -237,24 +237,22 @@ program
     
     // Check authentication first
     const isAuth = await auth.isAuthenticated();
-    if (!isAuth) {
-      console.log(chalk.yellow('⚠️  You need to authenticate first\n'));
-      const { doLogin } = await inquirer.prompt([{
-        type: 'confirm',
-        name: 'doLogin',
-        message: 'Would you like to login now?',
-        default: true
-      }]);
-      
-      if (doLogin) {
-        await auth.login();
-      } else {
-        console.log(chalk.gray('Run "forge login" when ready'));
-        process.exit(0);
-      }
-    }
-    
-    // Check for existing workspace
+      if (!isAuth) {
+        console.log(chalk.yellow('⚠️  You need to authenticate first\n'));
+        const { doLogin } = await inquirer.prompt([{
+          type: 'confirm',
+          name: 'doLogin',
+          message: 'Would you like to login now?',
+          default: true
+        }]);
+        
+        if (doLogin) {
+          await auth.login();
+        } else {
+          console.log(chalk.gray('Run "ecosystemcli login" when ready'));
+          process.exit(0);
+        }
+      }    // Check for existing workspace
     const workspaceDir = '.forge_workspace';
     try {
       await fs.access(workspaceDir);
@@ -279,12 +277,10 @@ program
     
     if (Object.keys(connectedServices).length === 0) {
       console.log(chalk.yellow('\n⚠️  No services connected yet\n'));
-      console.log(chalk.gray('Recommended services:'));
-      console.log(chalk.gray('  • Claude (forge connect claude) - For planning and review'));
-      console.log(chalk.gray('  • OpenAI (forge connect openai) - For code generation'));
-      console.log(chalk.gray('  • GitHub (forge connect github) - For repository access\n'));
-      
-      const { connectNow } = await inquirer.prompt([{
+        console.log(chalk.gray('Recommended services:'));
+        console.log(chalk.gray('  • Claude (ecosystemcli connect claude) - For planning and review'));
+        console.log(chalk.gray('  • OpenAI (ecosystemcli connect openai) - For code generation'));
+        console.log(chalk.gray('  • GitHub (ecosystemcli connect github) - For repository access\n'));      const { connectNow } = await inquirer.prompt([{
         type: 'confirm',
         name: 'connectNow',
         message: 'Would you like to connect services now?',
@@ -357,12 +353,10 @@ program
       }
       
       console.log(chalk.green.bold('\n✅ Workspace ready!'));
-      console.log(chalk.gray('\nNext steps:'));
-      console.log(chalk.gray('  1. Review agent configurations in .forge_workspace/agents/'));
-      console.log(chalk.gray('  2. Customize system prompts in .forge_workspace/agents/prompts/'));
-      console.log(chalk.gray('  3. Run your first audit: forge audit --security-scan'));
-      
-    } catch (error) {
+        console.log(chalk.gray('\nNext steps:'));
+        console.log(chalk.gray('  1. Review agent configurations in .forge_workspace/agents/'));
+        console.log(chalk.gray('  2. Customize system prompts in .forge_workspace/agents/prompts/'));
+        console.log(chalk.gray('  3. Run your first audit: ecosystemcli audit --security-scan'));    } catch (error) {
       spinner.fail('Initialization failed');
       console.error(chalk.red('Error:'), error.message);
       process.exit(1);

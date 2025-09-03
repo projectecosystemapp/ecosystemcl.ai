@@ -1,0 +1,50 @@
+version: 1
+backend:
+  phases:
+    build:
+      commands:
+        - npm install -g pnpm@latest
+        - pnpm install --frozen-lockfile
+        - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
+applications:
+  - appRoot: packages/web
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            # Install pnpm globally
+            - npm install -g pnpm@latest
+            # Install AWS Amplify CLI tools
+            - npm install -g @aws-amplify/cli @aws-amplify/backend-cli
+            # Install all dependencies from monorepo root
+            - cd ../.. && pnpm install --frozen-lockfile
+            # Generate Amplify configuration
+            - npx ampx generate outputs --branch $AWS_BRANCH --app-id $AWS_APP_ID
+            # Return to web package
+            - cd packages/web
+        build:
+          commands:
+            # Build the Next.js application
+            - pnpm run build
+      artifacts:
+        baseDirectory: .next
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - 'node_modules/**/*'
+          - '../../node_modules/**/*'
+    serverFunctions:
+      - name: ecosystemAgentOrchestrator
+        handler: packages/worker/dist/index.handler
+        runtime: nodejs20.x
+        environment:
+          AGENT_EXECUTION_ROLE: !GetAtt AgentExecutionRole.Arn
+          BEDROCK_REGION: us-east-1
+          SQS_QUEUE_URL: !Ref AgentJobQueue
+      - name: ecosystemAuthDevice
+        handler: packages/worker/dist/auth.deviceHandler
+        runtime: nodejs20.x
+        environment:
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPool
+          COGNITO_CLIENT_ID: !Ref CognitoUserPoolClient
