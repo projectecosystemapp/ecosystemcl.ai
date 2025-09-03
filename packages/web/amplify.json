@@ -1,0 +1,8 @@
+{
+  "hosting": {
+    "amplifyhosting": {
+      "appId": "ecosystemcl-ai",
+      "type": "cicd"
+    }
+  }
+}

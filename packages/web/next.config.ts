@@ -7,17 +7,12 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   output: 'standalone',
-  experimental: {
-    // Ensure turbopack works in production
-    turbo: {
-      root: process.env.AMPLIFY_MONOREPO_APP_ROOT ? '../..' : undefined,
-    },
-  },
-  // Allow images from Supabase storage if needed
+  // Allow images from AWS S3 if needed
   images: {
-    domains: process.env.NEXT_PUBLIC_SUPABASE_URL 
-      ? [new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname]
-      : [],
+    domains: [
+      'ecosystemcl-ai.s3.amazonaws.com',
+      'ecosystemcl-ai.s3.us-east-1.amazonaws.com'
+    ],
   },
 };
 
