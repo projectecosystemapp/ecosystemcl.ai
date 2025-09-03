@@ -161,6 +161,50 @@ const schema = a.schema({
       allow.guest().to(['create', 'read']),
       allow.authenticated(),
     ]),
+
+  // AI Conversations for agent interactions
+  agentChat: a
+    .conversation({
+      aiModel: a.ai.model('Claude 3.5 Sonnet'),
+      systemPrompt: 'You are an AI assistant for ECOSYSTEMCL.AI platform. Help users with code generation, planning, and development tasks.',
+    })
+    .authorization((allow) => [allow.authenticated()]),
+
+  // Code generation
+  generateCode: a
+    .generation({
+      aiModel: a.ai.model('Claude 3.5 Sonnet'),
+      systemPrompt: 'Generate production-ready code based on user requirements. Include proper error handling, documentation, and best practices.',
+    })
+    .arguments({
+      language: a.string().required(),
+      requirements: a.string().required(),
+      framework: a.string(),
+    })
+    .returns(a.customType({
+      code: a.string(),
+      explanation: a.string(),
+      dependencies: a.string().array(),
+    }))
+    .authorization((allow) => [allow.authenticated()]),
+
+  // Plan generation
+  generatePlan: a
+    .generation({
+      aiModel: a.ai.model('Claude 3.5 Sonnet'),
+      systemPrompt: 'Create detailed execution plans for development tasks. Break down complex goals into actionable steps.',
+    })
+    .arguments({
+      goal: a.string().required(),
+      context: a.string(),
+      constraints: a.string(),
+    })
+    .returns(a.customType({
+      steps: a.json(),
+      estimatedTime: a.integer(),
+      requiredAgents: a.string().array(),
+    }))
+    .authorization((allow) => [allow.authenticated()]),
 });
 
 export type Schema = ClientSchema<typeof schema>;
