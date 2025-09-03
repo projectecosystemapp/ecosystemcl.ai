@@ -1,0 +1,21 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "de6306a6766cea7b6ad2d0fd11dc6f2ac77b1f12a809b924639ba9ed75e5532b": {
+      "displayName": "EcosystemCL-Storage Template",
+      "source": {
+        "path": "EcosystemCL-StorageStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "219895243073-us-west-2-b3b0dbea": {
+          "bucketName": "cdk-hnb659fds-assets-219895243073-us-west-2",
+          "objectKey": "de6306a6766cea7b6ad2d0fd11dc6f2ac77b1f12a809b924639ba9ed75e5532b.json",
+          "region": "us-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-file-publishing-role-219895243073-us-west-2"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

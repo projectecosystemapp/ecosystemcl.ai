@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../asset-input/packages/worker/src/tools/helix_lookup.ts"],
+  "sourcesContent": ["export const handler = async (_event: any) => {\n  return {\n    statusCode: 200,\n    headers: { 'content-type': 'application/json' },\n    body: JSON.stringify({ result: 'helix_lookup placeholder' }),\n  };\n};\n\n"],
+  "mappings": "yaAAA,IAAAA,EAAA,GAAAC,EAAAD,EAAA,aAAAE,IAAA,eAAAC,EAAAH,GAAO,IAAME,EAAU,MAAOE,IACrB,CACL,WAAY,IACZ,QAAS,CAAE,eAAgB,kBAAmB,EAC9C,KAAM,KAAK,UAAU,CAAE,OAAQ,0BAA2B,CAAC,CAC7D",
+  "names": ["helix_lookup_exports", "__export", "handler", "__toCommonJS", "_event"]
+}

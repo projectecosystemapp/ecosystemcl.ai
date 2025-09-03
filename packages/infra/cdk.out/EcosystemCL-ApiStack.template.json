@@ -1,0 +1,1124 @@
+{
+ "Description": "API layer - API Gateway, Lambda, Cognito authentication",
+ "Resources": {
+  "EcosystemAPI5F04BC6C": {
+   "Type": "AWS::ApiGateway::RestApi",
+   "Properties": {
+    "Description": "ECOSYSTEMCL.AI Platform API",
+    "EndpointConfiguration": {
+     "Types": [
+      "REGIONAL"
+     ]
+    },
+    "Name": "ecosystemcl-api"
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Resource"
+   }
+  },
+  "EcosystemAPIDeploymentF641CB1Fc7c80ed0c7b97344d295cb0edff960ea": {
+   "Type": "AWS::ApiGateway::Deployment",
+   "Properties": {
+    "Description": "ECOSYSTEMCL.AI Platform API",
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    }
+   },
+   "DependsOn": [
+    "EcosystemAPIhealthGET2A659125",
+    "EcosystemAPIhealthOPTIONS1E95A893",
+    "EcosystemAPIhealth96EE62D4",
+    "EcosystemAPIOPTIONS6170D45C",
+    "EcosystemAPIpatternslookupOPTIONS45E572FF",
+    "EcosystemAPIpatternslookupPOST649CF630",
+    "EcosystemAPIpatternslookup3E4D030A",
+    "EcosystemAPIpatternsOPTIONSCE5E65F5",
+    "EcosystemAPIpatterns648112DC",
+    "EcosystemAPIplanningcreateOPTIONS8932A4F0",
+    "EcosystemAPIplanningcreatePOST002B91C0",
+    "EcosystemAPIplanningcreate0AAF3F27",
+    "EcosystemAPIplanningOPTIONSB2D3243A",
+    "EcosystemAPIplanning6677C40B",
+    "RequestValidatorB6FDBF18",
+    "UserPoolAuthorizer2F68B0CA"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Deployment/Resource",
+    "aws:cdk:do-not-refactor": true
+   }
+  },
+  "EcosystemAPIDeploymentStagev1B11E3A9C": {
+   "Type": "AWS::ApiGateway::Stage",
+   "Properties": {
+    "DeploymentId": {
+     "Ref": "EcosystemAPIDeploymentF641CB1Fc7c80ed0c7b97344d295cb0edff960ea"
+    },
+    "MethodSettings": [
+     {
+      "DataTraceEnabled": true,
+      "HttpMethod": "*",
+      "LoggingLevel": "ERROR",
+      "MetricsEnabled": true,
+      "ResourcePath": "/*",
+      "ThrottlingBurstLimit": 1000,
+      "ThrottlingRateLimit": 500
+     }
+    ],
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    },
+    "StageName": "v1",
+    "TracingEnabled": true
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/DeploymentStage.v1/Resource"
+   }
+  },
+  "EcosystemAPIOPTIONS6170D45C": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Fn::GetAtt": [
+      "EcosystemAPI5F04BC6C",
+      "RootResourceId"
+     ]
+    },
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/OPTIONS/Resource"
+   }
+  },
+  "EcosystemAPIpatterns648112DC": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "EcosystemAPI5F04BC6C",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "patterns",
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/patterns/Resource"
+   }
+  },
+  "EcosystemAPIpatternsOPTIONSCE5E65F5": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "EcosystemAPIpatterns648112DC"
+    },
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/patterns/OPTIONS/Resource"
+   }
+  },
+  "EcosystemAPIpatternslookup3E4D030A": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "EcosystemAPIpatterns648112DC"
+    },
+    "PathPart": "lookup",
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/patterns/lookup/Resource"
+   }
+  },
+  "EcosystemAPIpatternslookupOPTIONS45E572FF": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "EcosystemAPIpatternslookup3E4D030A"
+    },
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/patterns/lookup/OPTIONS/Resource"
+   }
+  },
+  "EcosystemAPIpatternslookupPOSTApiPermissionEcosystemCLApiStackEcosystemAPI7E20B1F6POSTpatternslookupD4849D3F": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "HelixLookupFunctionB756A9F7",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-west-2:219895243073:",
+       {
+        "Ref": "EcosystemAPI5F04BC6C"
+       },
+       "/",
+       {
+        "Ref": "EcosystemAPIDeploymentStagev1B11E3A9C"
+       },
+       "/POST/patterns/lookup"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/patterns/lookup/POST/ApiPermission.EcosystemCLApiStackEcosystemAPI7E20B1F6.POST..patterns.lookup"
+   }
+  },
+  "EcosystemAPIpatternslookupPOSTApiPermissionTestEcosystemCLApiStackEcosystemAPI7E20B1F6POSTpatternslookup16D69465": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "HelixLookupFunctionB756A9F7",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-west-2:219895243073:",
+       {
+        "Ref": "EcosystemAPI5F04BC6C"
+       },
+       "/test-invoke-stage/POST/patterns/lookup"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/patterns/lookup/POST/ApiPermission.Test.EcosystemCLApiStackEcosystemAPI7E20B1F6.POST..patterns.lookup"
+   }
+  },
+  "EcosystemAPIpatternslookupPOST649CF630": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "UserPoolAuthorizer2F68B0CA"
+    },
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "HelixLookupFunctionB756A9F7",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "EcosystemAPIpatternslookup3E4D030A"
+    },
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/patterns/lookup/POST/Resource"
+   }
+  },
+  "EcosystemAPIplanning6677C40B": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "EcosystemAPI5F04BC6C",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "planning",
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/planning/Resource"
+   }
+  },
+  "EcosystemAPIplanningOPTIONSB2D3243A": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "EcosystemAPIplanning6677C40B"
+    },
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/planning/OPTIONS/Resource"
+   }
+  },
+  "EcosystemAPIplanningcreate0AAF3F27": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "EcosystemAPIplanning6677C40B"
+    },
+    "PathPart": "create",
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/planning/create/Resource"
+   }
+  },
+  "EcosystemAPIplanningcreateOPTIONS8932A4F0": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "EcosystemAPIplanningcreate0AAF3F27"
+    },
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/planning/create/OPTIONS/Resource"
+   }
+  },
+  "EcosystemAPIplanningcreatePOSTApiPermissionEcosystemCLApiStackEcosystemAPI7E20B1F6POSTplanningcreateEC428921": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "PlannerFunction7813D2C8",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-west-2:219895243073:",
+       {
+        "Ref": "EcosystemAPI5F04BC6C"
+       },
+       "/",
+       {
+        "Ref": "EcosystemAPIDeploymentStagev1B11E3A9C"
+       },
+       "/POST/planning/create"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/planning/create/POST/ApiPermission.EcosystemCLApiStackEcosystemAPI7E20B1F6.POST..planning.create"
+   }
+  },
+  "EcosystemAPIplanningcreatePOSTApiPermissionTestEcosystemCLApiStackEcosystemAPI7E20B1F6POSTplanningcreateADD397FA": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "PlannerFunction7813D2C8",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-west-2:219895243073:",
+       {
+        "Ref": "EcosystemAPI5F04BC6C"
+       },
+       "/test-invoke-stage/POST/planning/create"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/planning/create/POST/ApiPermission.Test.EcosystemCLApiStackEcosystemAPI7E20B1F6.POST..planning.create"
+   }
+  },
+  "EcosystemAPIplanningcreatePOST002B91C0": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "UserPoolAuthorizer2F68B0CA"
+    },
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "PlannerFunction7813D2C8",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "EcosystemAPIplanningcreate0AAF3F27"
+    },
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/planning/create/POST/Resource"
+   }
+  },
+  "EcosystemAPIhealth96EE62D4": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "EcosystemAPI5F04BC6C",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "health",
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/health/Resource"
+   }
+  },
+  "EcosystemAPIhealthOPTIONS1E95A893": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "EcosystemAPIhealth96EE62D4"
+    },
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/health/OPTIONS/Resource"
+   }
+  },
+  "EcosystemAPIhealthGET2A659125": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseTemplates": {
+        "application/json": "{\"status\":\"healthy\",\"service\":\"ECOSYSTEMCL.AI\",\"timestamp\":\"2025-09-03T22:59:26.405Z\"}"
+       },
+       "StatusCode": "200"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{\"statusCode\":200}"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "StatusCode": "200"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "EcosystemAPIhealth96EE62D4"
+    },
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Default/health/GET/Resource"
+   }
+  },
+  "UserPoolAuthorizer2F68B0CA": {
+   "Type": "AWS::ApiGateway::Authorizer",
+   "Properties": {
+    "IdentitySource": "method.request.header.Authorization",
+    "Name": "CognitoAuthorizer",
+    "ProviderARNs": [
+     {
+      "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttUserPool6BA7E5F2Arn686ACC00"
+     }
+    ],
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    },
+    "Type": "COGNITO_USER_POOLS"
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/UserPoolAuthorizer/Resource"
+   }
+  },
+  "HelixLookupFunctionServiceRole3017743B": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/HelixLookupFunction/ServiceRole/Resource"
+   }
+  },
+  "HelixLookupFunctionServiceRoleDefaultPolicy2561DE1E": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "xray:PutTelemetryRecords",
+        "xray:PutTraceSegments"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:Scan"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttHelixPatternEntriesD80A9318Arn058D2365"
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttHelixPatternEntriesD80A9318Arn058D2365"
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "HelixLookupFunctionServiceRoleDefaultPolicy2561DE1E",
+    "Roles": [
+     {
+      "Ref": "HelixLookupFunctionServiceRole3017743B"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/HelixLookupFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "HelixLookupFunctionB756A9F7": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-219895243073-us-west-2",
+     "S3Key": "d7532005b26324893f9b2a12cb6e5867acf9545eadf5d1b57daa260a1360f2cd.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "PATTERN_TABLE_NAME": {
+       "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputRefHelixPatternEntriesD80A9318917C9230"
+      },
+      "NODE_OPTIONS": "--enable-source-maps"
+     }
+    },
+    "FunctionName": "ecosystemcl-helix-lookup",
+    "Handler": "index.handler",
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "HelixLookupFunctionServiceRole3017743B",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 10,
+    "TracingConfig": {
+     "Mode": "Active"
+    }
+   },
+   "DependsOn": [
+    "HelixLookupFunctionServiceRoleDefaultPolicy2561DE1E",
+    "HelixLookupFunctionServiceRole3017743B"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/HelixLookupFunction/Resource",
+    "aws:asset:path": "asset.d7532005b26324893f9b2a12cb6e5867acf9545eadf5d1b57daa260a1360f2cd",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Code"
+   }
+  },
+  "PlannerFunctionServiceRoleC9E6D47A": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/PlannerFunction/ServiceRole/Resource"
+   }
+  },
+  "PlannerFunctionServiceRoleDefaultPolicyEF66685F": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream",
+        "xray:PutTelemetryRecords",
+        "xray:PutTraceSegments"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:Scan"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttHelixPatternEntriesD80A9318Arn058D2365"
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttHelixPatternEntriesD80A9318Arn058D2365"
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttWorkspaceStates6310A076ArnD1B61578"
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttWorkspaceStates6310A076ArnD1B61578"
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl",
+        "sqs:SendMessage"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::ImportValue": "EcosystemCL-Compute:ExportsOutputFnGetAttTaskQueueF51BE51CArnEED53A76"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "PlannerFunctionServiceRoleDefaultPolicyEF66685F",
+    "Roles": [
+     {
+      "Ref": "PlannerFunctionServiceRoleC9E6D47A"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/PlannerFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "PlannerFunction7813D2C8": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-219895243073-us-west-2",
+     "S3Key": "4e4ba33d60f610f536c9e0ae0dc70f65f8c1bdb1a7ef8fe586cf9e2cbc532f5f.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "PATTERN_TABLE_NAME": {
+       "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputRefHelixPatternEntriesD80A9318917C9230"
+      },
+      "WORKSPACE_TABLE_NAME": {
+       "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputRefWorkspaceStates6310A07673C5D374"
+      },
+      "TASK_QUEUE_URL": {
+       "Fn::ImportValue": "EcosystemCL-Compute:ExportsOutputRefTaskQueueF51BE51CA692F10C"
+      },
+      "NODE_OPTIONS": "--enable-source-maps"
+     }
+    },
+    "FunctionName": "ecosystemcl-planner",
+    "Handler": "index.handler",
+    "MemorySize": 1024,
+    "Role": {
+     "Fn::GetAtt": [
+      "PlannerFunctionServiceRoleC9E6D47A",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 30,
+    "TracingConfig": {
+     "Mode": "Active"
+    }
+   },
+   "DependsOn": [
+    "PlannerFunctionServiceRoleDefaultPolicyEF66685F",
+    "PlannerFunctionServiceRoleC9E6D47A"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/PlannerFunction/Resource",
+    "aws:asset:path": "asset.4e4ba33d60f610f536c9e0ae0dc70f65f8c1bdb1a7ef8fe586cf9e2cbc532f5f",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Code"
+   }
+  },
+  "RequestValidatorB6FDBF18": {
+   "Type": "AWS::ApiGateway::RequestValidator",
+   "Properties": {
+    "Name": "ValidateBody",
+    "RestApiId": {
+     "Ref": "EcosystemAPI5F04BC6C"
+    },
+    "ValidateRequestBody": true,
+    "ValidateRequestParameters": false
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/RequestValidator/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/1VRzU6EMBB+Fu+lKm7imdV4UwlGr6QLIztQWuxM3SDh3W0XiOtpvr9MZ6apTG938uZKnSip6i7ReJDTG6uqE0EqJzVgoxhOapRTAcTZgOLh02zwEQZtxx4MR/WChRYNRG0BIW+9q2CvCMQz8NHW0VzR5q6dV2wbg2zfCVxurabMh6zDH3AxdsEK+PJhnA+lsVZs3dLlvzYLrfpDreQUzBxcj0RoTYw+eVNxwFukNLaGluTLuWyuQNWHC1i9DBlrbjVWY6QLmgXdlYoImGQWS+By76sOOK49x+Sr58Hz38LnXDwRmmYW8WXZ0vV3upP34VNaQkycN4w9yGKpv41xWSWxAQAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ApiStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "EcosystemAPIEndpoint07194E90": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "EcosystemAPI5F04BC6C"
+      },
+      ".execute-api.us-west-2.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "EcosystemAPIDeploymentStagev1B11E3A9C"
+      },
+      "/"
+     ]
+    ]
+   }
+  },
+  "ApiEndpoint": {
+   "Description": "API Gateway endpoint URL",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "EcosystemAPI5F04BC6C"
+      },
+      ".execute-api.us-west-2.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "EcosystemAPIDeploymentStagev1B11E3A9C"
+      },
+      "/"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "EcosystemCLApiEndpoint"
+   }
+  },
+  "HelixLookupFunctionArn": {
+   "Description": "Helix Lookup Lambda function ARN",
+   "Value": {
+    "Fn::GetAtt": [
+     "HelixLookupFunctionB756A9F7",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "HelixLookupFunctionArn"
+   }
+  },
+  "PlannerFunctionArn": {
+   "Description": "Planner Lambda function ARN",
+   "Value": {
+    "Fn::GetAtt": [
+     "PlannerFunction7813D2C8",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "PlannerFunctionArn"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,36 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "7fa1e366ee8a9ded01fc355f704cff92bfd179574e6f9cfee800a3541df1b200": {
+      "displayName": "EcosystemCL-ComputeStack/Custom::VpcRestrictDefaultSGCustomResourceProvider Code",
+      "source": {
+        "path": "asset.7fa1e366ee8a9ded01fc355f704cff92bfd179574e6f9cfee800a3541df1b200",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "219895243073-us-west-2-42668558": {
+          "bucketName": "cdk-hnb659fds-assets-219895243073-us-west-2",
+          "objectKey": "7fa1e366ee8a9ded01fc355f704cff92bfd179574e6f9cfee800a3541df1b200.zip",
+          "region": "us-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-file-publishing-role-219895243073-us-west-2"
+        }
+      }
+    },
+    "75291cee0ee94c0660e388e2d418c2f375757fbd1c27453c6c9b669d2dcecc55": {
+      "displayName": "EcosystemCL-Compute Template",
+      "source": {
+        "path": "EcosystemCL-ComputeStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "219895243073-us-west-2-63aaac13": {
+          "bucketName": "cdk-hnb659fds-assets-219895243073-us-west-2",
+          "objectKey": "75291cee0ee94c0660e388e2d418c2f375757fbd1c27453c6c9b669d2dcecc55.json",
+          "region": "us-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-file-publishing-role-219895243073-us-west-2"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

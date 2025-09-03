@@ -1,0 +1,1251 @@
+{
+ "Description": "Serverless compute layer - ECS Fargate, SQS, Step Functions",
+ "Resources": {
+  "ComputeVPC7985E27D": {
+   "Type": "AWS::EC2::VPC",
+   "Properties": {
+    "CidrBlock": "10.0.0.0/16",
+    "EnableDnsHostnames": true,
+    "EnableDnsSupport": true,
+    "InstanceTenancy": "default",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcosystemCL-ComputeVPC"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/Resource"
+   }
+  },
+  "ComputeVPCPublicSubnet1Subnet02F5549C": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-west-2a",
+    "CidrBlock": "10.0.0.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "EcosystemCL-ComputeStack/ComputeVPC/PublicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ComputeVPC7985E27D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PublicSubnet1/Subnet"
+   }
+  },
+  "ComputeVPCPublicSubnet1RouteTableDFD0AC54": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcosystemCL-ComputeStack/ComputeVPC/PublicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ComputeVPC7985E27D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PublicSubnet1/RouteTable"
+   }
+  },
+  "ComputeVPCPublicSubnet1RouteTableAssociation59B9DFD5": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "ComputeVPCPublicSubnet1RouteTableDFD0AC54"
+    },
+    "SubnetId": {
+     "Ref": "ComputeVPCPublicSubnet1Subnet02F5549C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PublicSubnet1/RouteTableAssociation"
+   }
+  },
+  "ComputeVPCPublicSubnet1DefaultRoute861D33E8": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "ComputeVPCIGW017999F1"
+    },
+    "RouteTableId": {
+     "Ref": "ComputeVPCPublicSubnet1RouteTableDFD0AC54"
+    }
+   },
+   "DependsOn": [
+    "ComputeVPCVPCGW82A5778B"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PublicSubnet1/DefaultRoute"
+   }
+  },
+  "ComputeVPCPublicSubnet1EIP467421EE": {
+   "Type": "AWS::EC2::EIP",
+   "Properties": {
+    "Domain": "vpc",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcosystemCL-ComputeStack/ComputeVPC/PublicSubnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PublicSubnet1/EIP"
+   }
+  },
+  "ComputeVPCPublicSubnet1NATGateway5177371A": {
+   "Type": "AWS::EC2::NatGateway",
+   "Properties": {
+    "AllocationId": {
+     "Fn::GetAtt": [
+      "ComputeVPCPublicSubnet1EIP467421EE",
+      "AllocationId"
+     ]
+    },
+    "SubnetId": {
+     "Ref": "ComputeVPCPublicSubnet1Subnet02F5549C"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcosystemCL-ComputeStack/ComputeVPC/PublicSubnet1"
+     }
+    ]
+   },
+   "DependsOn": [
+    "ComputeVPCPublicSubnet1DefaultRoute861D33E8",
+    "ComputeVPCPublicSubnet1RouteTableAssociation59B9DFD5"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PublicSubnet1/NATGateway"
+   }
+  },
+  "ComputeVPCPublicSubnet2Subnet1072C708": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-west-2b",
+    "CidrBlock": "10.0.1.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "EcosystemCL-ComputeStack/ComputeVPC/PublicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ComputeVPC7985E27D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PublicSubnet2/Subnet"
+   }
+  },
+  "ComputeVPCPublicSubnet2RouteTable06D8FF08": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcosystemCL-ComputeStack/ComputeVPC/PublicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ComputeVPC7985E27D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PublicSubnet2/RouteTable"
+   }
+  },
+  "ComputeVPCPublicSubnet2RouteTableAssociation2C38243F": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "ComputeVPCPublicSubnet2RouteTable06D8FF08"
+    },
+    "SubnetId": {
+     "Ref": "ComputeVPCPublicSubnet2Subnet1072C708"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PublicSubnet2/RouteTableAssociation"
+   }
+  },
+  "ComputeVPCPublicSubnet2DefaultRouteF48DA003": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "ComputeVPCIGW017999F1"
+    },
+    "RouteTableId": {
+     "Ref": "ComputeVPCPublicSubnet2RouteTable06D8FF08"
+    }
+   },
+   "DependsOn": [
+    "ComputeVPCVPCGW82A5778B"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PublicSubnet2/DefaultRoute"
+   }
+  },
+  "ComputeVPCPrivateSubnet1Subnet301629D2": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-west-2a",
+    "CidrBlock": "10.0.2.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "EcosystemCL-ComputeStack/ComputeVPC/PrivateSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ComputeVPC7985E27D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PrivateSubnet1/Subnet"
+   }
+  },
+  "ComputeVPCPrivateSubnet1RouteTable8A2FBD71": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcosystemCL-ComputeStack/ComputeVPC/PrivateSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ComputeVPC7985E27D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PrivateSubnet1/RouteTable"
+   }
+  },
+  "ComputeVPCPrivateSubnet1RouteTableAssociation2998B3FA": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "ComputeVPCPrivateSubnet1RouteTable8A2FBD71"
+    },
+    "SubnetId": {
+     "Ref": "ComputeVPCPrivateSubnet1Subnet301629D2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PrivateSubnet1/RouteTableAssociation"
+   }
+  },
+  "ComputeVPCPrivateSubnet1DefaultRoute01F3FE7C": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "ComputeVPCPublicSubnet1NATGateway5177371A"
+    },
+    "RouteTableId": {
+     "Ref": "ComputeVPCPrivateSubnet1RouteTable8A2FBD71"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PrivateSubnet1/DefaultRoute"
+   }
+  },
+  "ComputeVPCPrivateSubnet2Subnet25D445C0": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-west-2b",
+    "CidrBlock": "10.0.3.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "EcosystemCL-ComputeStack/ComputeVPC/PrivateSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ComputeVPC7985E27D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PrivateSubnet2/Subnet"
+   }
+  },
+  "ComputeVPCPrivateSubnet2RouteTableDB299B86": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcosystemCL-ComputeStack/ComputeVPC/PrivateSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ComputeVPC7985E27D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PrivateSubnet2/RouteTable"
+   }
+  },
+  "ComputeVPCPrivateSubnet2RouteTableAssociationAB1BF283": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "ComputeVPCPrivateSubnet2RouteTableDB299B86"
+    },
+    "SubnetId": {
+     "Ref": "ComputeVPCPrivateSubnet2Subnet25D445C0"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PrivateSubnet2/RouteTableAssociation"
+   }
+  },
+  "ComputeVPCPrivateSubnet2DefaultRoute7A3AEB52": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "ComputeVPCPublicSubnet1NATGateway5177371A"
+    },
+    "RouteTableId": {
+     "Ref": "ComputeVPCPrivateSubnet2RouteTableDB299B86"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/PrivateSubnet2/DefaultRoute"
+   }
+  },
+  "ComputeVPCIGW017999F1": {
+   "Type": "AWS::EC2::InternetGateway",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcosystemCL-ComputeVPC"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/IGW"
+   }
+  },
+  "ComputeVPCVPCGW82A5778B": {
+   "Type": "AWS::EC2::VPCGatewayAttachment",
+   "Properties": {
+    "InternetGatewayId": {
+     "Ref": "ComputeVPCIGW017999F1"
+    },
+    "VpcId": {
+     "Ref": "ComputeVPC7985E27D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/VPCGW"
+   }
+  },
+  "ComputeVPCRestrictDefaultSecurityGroupCustomResourceD2DBE83E": {
+   "Type": "Custom::VpcRestrictDefaultSG",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E",
+      "Arn"
+     ]
+    },
+    "DefaultSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ComputeVPC7985E27D",
+      "DefaultSecurityGroup"
+     ]
+    },
+    "Account": "219895243073"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ComputeVPC/RestrictDefaultSecurityGroupCustomResource/Default"
+   }
+  },
+  "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyName": "Inline",
+      "PolicyDocument": {
+       "Version": "2012-10-17",
+       "Statement": [
+        {
+         "Effect": "Allow",
+         "Action": [
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupEgress"
+         ],
+         "Resource": [
+          {
+           "Fn::Join": [
+            "",
+            [
+             "arn:aws:ec2:us-west-2:219895243073:security-group/",
+             {
+              "Fn::GetAtt": [
+               "ComputeVPC7985E27D",
+               "DefaultSecurityGroup"
+              ]
+             }
+            ]
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role"
+   }
+  },
+  "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-219895243073-us-west-2",
+     "S3Key": "7fa1e366ee8a9ded01fc355f704cff92bfd179574e6f9cfee800a3541df1b200.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "__entrypoint__.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Description": "Lambda function for removing all inbound/outbound rules from the VPC default security group"
+   },
+   "DependsOn": [
+    "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.7fa1e366ee8a9ded01fc355f704cff92bfd179574e6f9cfee800a3541df1b200",
+    "aws:asset:property": "Code"
+   }
+  },
+  "ECSCluster7D463CD4": {
+   "Type": "AWS::ECS::Cluster",
+   "Properties": {
+    "ClusterName": "ecosystemcl-agents",
+    "ClusterSettings": [
+     {
+      "Name": "containerInsights",
+      "Value": "enabled"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ECSCluster/Resource"
+   }
+  },
+  "DeadLetterQueue9F481546": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "KmsMasterKeyId": "alias/aws/sqs",
+    "MessageRetentionPeriod": 1209600,
+    "QueueName": "ecosystemcl-dlq"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/DeadLetterQueue/Resource"
+   }
+  },
+  "TaskQueueF51BE51C": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "KmsMasterKeyId": "alias/aws/sqs",
+    "MessageRetentionPeriod": 345600,
+    "QueueName": "ecosystemcl-tasks",
+    "RedrivePolicy": {
+     "deadLetterTargetArn": {
+      "Fn::GetAtt": [
+       "DeadLetterQueue9F481546",
+       "Arn"
+      ]
+     },
+     "maxReceiveCount": 3
+    },
+    "VisibilityTimeout": 900
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/TaskQueue/Resource"
+   }
+  },
+  "TaskExecutionRole250D2532": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/TaskExecutionRole/Resource"
+   }
+  },
+  "TaskExecutionRoleDefaultPolicyA84DD1B0": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "AgentTaskDefinitionAgentContainerLogGroup98D93729",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "TaskExecutionRoleDefaultPolicyA84DD1B0",
+    "Roles": [
+     {
+      "Ref": "TaskExecutionRole250D2532"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/TaskExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "TaskRole30FC0FBB": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/TaskRole/Resource"
+   }
+  },
+  "TaskRoleDefaultPolicy07FC53DE": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:Abort*",
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::ImportValue": "EcosystemCL-Storage:ExportsOutputFnGetAttArtifactsBucket2AAC5544ArnD57FAE19"
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "EcosystemCL-Storage:ExportsOutputFnGetAttArtifactsBucket2AAC5544ArnD57FAE19"
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttHelixPatternEntriesD80A9318Arn058D2365"
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttHelixPatternEntriesD80A9318Arn058D2365"
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "sqs:ChangeMessageVisibility",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl",
+        "sqs:ReceiveMessage",
+        "sqs:SendMessage"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "TaskQueueF51BE51C",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "TaskRoleDefaultPolicy07FC53DE",
+    "Roles": [
+     {
+      "Ref": "TaskRole30FC0FBB"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/TaskRole/DefaultPolicy/Resource"
+   }
+  },
+  "AgentTaskDefinition51789D54": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Environment": [
+       {
+        "Name": "TASK_QUEUE_URL",
+        "Value": {
+         "Ref": "TaskQueueF51BE51C"
+        }
+       },
+       {
+        "Name": "PATTERN_TABLE_NAME",
+        "Value": {
+         "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputRefHelixPatternEntriesD80A9318917C9230"
+        }
+       }
+      ],
+      "Essential": true,
+      "Image": "public.ecr.aws/docker/library/node:20-alpine",
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "AgentTaskDefinitionAgentContainerLogGroup98D93729"
+        },
+        "awslogs-stream-prefix": "ecosystemcl-agent",
+        "awslogs-region": "us-west-2"
+       }
+      },
+      "Name": "AgentContainer"
+     }
+    ],
+    "Cpu": "1024",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "TaskExecutionRole250D2532",
+      "Arn"
+     ]
+    },
+    "Family": "EcosystemCLComputeStackAgentTaskDefinition66E7849B",
+    "Memory": "2048",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "TaskRole30FC0FBB",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/AgentTaskDefinition/Resource"
+   }
+  },
+  "AgentTaskDefinitionAgentContainerLogGroup98D93729": {
+   "Type": "AWS::Logs::LogGroup",
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/AgentTaskDefinition/AgentContainer/LogGroup/Resource"
+   }
+  },
+  "SourceCodeAnalyzerSecurityGroup570F9174": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "EcosystemCL-ComputeStack/SourceCodeAnalyzer/SecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ComputeVPC7985E27D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/SourceCodeAnalyzer/SecurityGroup/Resource"
+   }
+  },
+  "EmbeddingAgentSecurityGroupDEC82812": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "EcosystemCL-ComputeStack/EmbeddingAgent/SecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ComputeVPC7985E27D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/EmbeddingAgent/SecurityGroup/Resource"
+   }
+  },
+  "PatternSynthesizerSecurityGroupE34143A0": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "EcosystemCL-ComputeStack/PatternSynthesizer/SecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ComputeVPC7985E27D"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/PatternSynthesizer/SecurityGroup/Resource"
+   }
+  },
+  "ProjectAtlasStateMachineRoleE51ECEDA": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "states.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ProjectAtlasStateMachine/Role/Resource"
+   }
+  },
+  "ProjectAtlasStateMachineRoleDefaultPolicy143E88DE": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "ecs:RunTask",
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:",
+          {
+           "Fn::Select": [
+            1,
+            {
+             "Fn::Split": [
+              ":",
+              {
+               "Ref": "AgentTaskDefinition51789D54"
+              }
+             ]
+            }
+           ]
+          },
+          ":",
+          {
+           "Fn::Select": [
+            2,
+            {
+             "Fn::Split": [
+              ":",
+              {
+               "Ref": "AgentTaskDefinition51789D54"
+              }
+             ]
+            }
+           ]
+          },
+          ":",
+          {
+           "Fn::Select": [
+            3,
+            {
+             "Fn::Split": [
+              ":",
+              {
+               "Ref": "AgentTaskDefinition51789D54"
+              }
+             ]
+            }
+           ]
+          },
+          ":",
+          {
+           "Fn::Select": [
+            4,
+            {
+             "Fn::Split": [
+              ":",
+              {
+               "Ref": "AgentTaskDefinition51789D54"
+              }
+             ]
+            }
+           ]
+          },
+          ":",
+          {
+           "Fn::Select": [
+            0,
+            {
+             "Fn::Split": [
+              "/",
+              {
+               "Fn::Select": [
+                5,
+                {
+                 "Fn::Split": [
+                  ":",
+                  {
+                   "Ref": "AgentTaskDefinition51789D54"
+                  }
+                 ]
+                }
+               ]
+              }
+             ]
+            }
+           ]
+          },
+          "/",
+          {
+           "Fn::Select": [
+            1,
+            {
+             "Fn::Split": [
+              "/",
+              {
+               "Fn::Select": [
+                5,
+                {
+                 "Fn::Split": [
+                  ":",
+                  {
+                   "Ref": "AgentTaskDefinition51789D54"
+                  }
+                 ]
+                }
+               ]
+              }
+             ]
+            }
+           ]
+          },
+          ":*"
+         ]
+        ]
+       }
+      },
+      {
+       "Action": [
+        "ecs:DescribeTasks",
+        "ecs:StopTask",
+        "xray:GetSamplingRules",
+        "xray:GetSamplingTargets",
+        "xray:PutTelemetryRecords",
+        "xray:PutTraceSegments"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": "iam:PassRole",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "TaskExecutionRole250D2532",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "TaskRole30FC0FBB",
+          "Arn"
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ProjectAtlasStateMachineRoleDefaultPolicy143E88DE",
+    "Roles": [
+     {
+      "Ref": "ProjectAtlasStateMachineRoleE51ECEDA"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ProjectAtlasStateMachine/Role/DefaultPolicy/Resource"
+   }
+  },
+  "ProjectAtlasStateMachine21FBB44A": {
+   "Type": "AWS::StepFunctions::StateMachine",
+   "Properties": {
+    "DefinitionString": {
+     "Fn::Join": [
+      "",
+      [
+       "{\"StartAt\":\"ProcessingStages\",\"States\":{\"ProcessingStages\":{\"Type\":\"Parallel\",\"Next\":\"EmbeddingAgent\",\"Branches\":[{\"StartAt\":\"SourceCodeAnalyzer\",\"States\":{\"SourceCodeAnalyzer\":{\"End\":true,\"Type\":\"Task\",\"Resource\":\"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":states:::ecs:runTask\",\"Parameters\":{\"Cluster\":\"",
+       {
+        "Fn::GetAtt": [
+         "ECSCluster7D463CD4",
+         "Arn"
+        ]
+       },
+       "\",\"TaskDefinition\":\"EcosystemCLComputeStackAgentTaskDefinition66E7849B\",\"NetworkConfiguration\":{\"AwsvpcConfiguration\":{\"Subnets\":[\"",
+       {
+        "Ref": "ComputeVPCPrivateSubnet1Subnet301629D2"
+       },
+       "\",\"",
+       {
+        "Ref": "ComputeVPCPrivateSubnet2Subnet25D445C0"
+       },
+       "\"],\"SecurityGroups\":[\"",
+       {
+        "Fn::GetAtt": [
+         "SourceCodeAnalyzerSecurityGroup570F9174",
+         "GroupId"
+        ]
+       },
+       "\"]}},\"Overrides\":{\"ContainerOverrides\":[{\"Name\":\"AgentContainer\",\"Environment\":[{\"Name\":\"AGENT_TYPE\",\"Value\":\"SourceCodeAnalyzer\"}]}]},\"LaunchType\":\"FARGATE\",\"PlatformVersion\":\"LATEST\"}}}}]},\"EmbeddingAgent\":{\"Next\":\"PatternSynthesizer\",\"Type\":\"Task\",\"Resource\":\"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":states:::ecs:runTask\",\"Parameters\":{\"Cluster\":\"",
+       {
+        "Fn::GetAtt": [
+         "ECSCluster7D463CD4",
+         "Arn"
+        ]
+       },
+       "\",\"TaskDefinition\":\"EcosystemCLComputeStackAgentTaskDefinition66E7849B\",\"NetworkConfiguration\":{\"AwsvpcConfiguration\":{\"Subnets\":[\"",
+       {
+        "Ref": "ComputeVPCPrivateSubnet1Subnet301629D2"
+       },
+       "\",\"",
+       {
+        "Ref": "ComputeVPCPrivateSubnet2Subnet25D445C0"
+       },
+       "\"],\"SecurityGroups\":[\"",
+       {
+        "Fn::GetAtt": [
+         "EmbeddingAgentSecurityGroupDEC82812",
+         "GroupId"
+        ]
+       },
+       "\"]}},\"Overrides\":{\"ContainerOverrides\":[{\"Name\":\"AgentContainer\",\"Environment\":[{\"Name\":\"AGENT_TYPE\",\"Value\":\"EmbeddingAgent\"}]}]},\"LaunchType\":\"FARGATE\",\"PlatformVersion\":\"LATEST\"}},\"PatternSynthesizer\":{\"End\":true,\"Type\":\"Task\",\"Resource\":\"arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":states:::ecs:runTask\",\"Parameters\":{\"Cluster\":\"",
+       {
+        "Fn::GetAtt": [
+         "ECSCluster7D463CD4",
+         "Arn"
+        ]
+       },
+       "\",\"TaskDefinition\":\"EcosystemCLComputeStackAgentTaskDefinition66E7849B\",\"NetworkConfiguration\":{\"AwsvpcConfiguration\":{\"Subnets\":[\"",
+       {
+        "Ref": "ComputeVPCPrivateSubnet1Subnet301629D2"
+       },
+       "\",\"",
+       {
+        "Ref": "ComputeVPCPrivateSubnet2Subnet25D445C0"
+       },
+       "\"],\"SecurityGroups\":[\"",
+       {
+        "Fn::GetAtt": [
+         "PatternSynthesizerSecurityGroupE34143A0",
+         "GroupId"
+        ]
+       },
+       "\"]}},\"Overrides\":{\"ContainerOverrides\":[{\"Name\":\"AgentContainer\",\"Environment\":[{\"Name\":\"AGENT_TYPE\",\"Value\":\"PatternSynthesizer\"}]}]},\"LaunchType\":\"FARGATE\",\"PlatformVersion\":\"LATEST\"}}}}"
+      ]
+     ]
+    },
+    "RoleArn": {
+     "Fn::GetAtt": [
+      "ProjectAtlasStateMachineRoleE51ECEDA",
+      "Arn"
+     ]
+    },
+    "StateMachineName": "ProjectAtlas-Pipeline",
+    "TracingConfiguration": {
+     "Enabled": true
+    }
+   },
+   "DependsOn": [
+    "ProjectAtlasStateMachineRoleDefaultPolicy143E88DE",
+    "ProjectAtlasStateMachineRoleE51ECEDA"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/ProjectAtlasStateMachine/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/21Sy27CMBD8lt6N2yKknimlCKmPNFRckWOWdMGxU3sNQlH+vZukaRDqaWfH+5ixPZbj+4m8u1GnMNLbw8hgJqsVKX0QTG0q0GNZrUstZju7TmYiiZlBvYqZBWq4AaUuEnyqzMDAD9w0BKdRETr7V9yA+TJpwpuihSI4qbNIPB4ZDoOXlsAz7gs6Jb/ZlFjrVwGWxAp09EjnhXexbDVcErUAHWQ1MzHwuOa4h8/K56qRGQ5PsEOLvchrxllSaMEPXC3CNw/9iBBbNy2oBapCVqnrbqKNieNba6V3qBbG5dz54vI/uT3moQTlLlrdrOCiRHllDBjB70Lwyn5ZRWvwIr/q2hCLD3KuQxpbI7VIIbjoNXeyb1cMKWv8/yjx7ohb8I8qgOAXBOKNOdq86XmPVEaqhXVbkPtwexxP5AP/pH1AHPloCQuQaRd/ANewt1pmAgAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "TaskQueueUrl": {
+   "Description": "SQS Queue URL for task submission",
+   "Value": {
+    "Ref": "TaskQueueF51BE51C"
+   },
+   "Export": {
+    "Name": "TaskQueueUrl"
+   }
+  },
+  "StateMachineArn": {
+   "Description": "Step Functions State Machine ARN",
+   "Value": {
+    "Ref": "ProjectAtlasStateMachine21FBB44A"
+   },
+   "Export": {
+    "Name": "ProjectAtlasStateMachineArn"
+   }
+  },
+  "ExportsOutputFnGetAttTaskQueueF51BE51CArnEED53A76": {
+   "Value": {
+    "Fn::GetAtt": [
+     "TaskQueueF51BE51C",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "EcosystemCL-Compute:ExportsOutputFnGetAttTaskQueueF51BE51CArnEED53A76"
+   }
+  },
+  "ExportsOutputRefTaskQueueF51BE51CA692F10C": {
+   "Value": {
+    "Ref": "TaskQueueF51BE51C"
+   },
+   "Export": {
+    "Name": "EcosystemCL-Compute:ExportsOutputRefTaskQueueF51BE51CA692F10C"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
