@@ -40,5 +40,23 @@ export const storage = defineStorage({
     'cache/models/{workspace_id}/*': [
       allow.authenticated.to(['read', 'write']),
     ],
+    
+    // Generated code repositories
+    'repositories/{workspace_id}/*': [
+      allow.entity('identity').to(['read', 'write', 'delete']),
+      allow.groups(['admins']).to(['read', 'write', 'delete']),
+    ],
+    
+    // Agent memory and context
+    'memory/agents/{workspace_id}/*': [
+      allow.authenticated.to(['read', 'write']),
+      allow.groups(['admins']).to(['read', 'write', 'delete']),
+    ],
+    
+    // Deployment artifacts
+    'deployments/{workspace_id}/*': [
+      allow.entity('identity').to(['read', 'write']),
+      allow.groups(['admins']).to(['read', 'write', 'delete']),
+    ],
   }),
 });
