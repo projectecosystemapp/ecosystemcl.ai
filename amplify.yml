@@ -5,24 +5,18 @@ applications:
       phases:
         preBuild:
           commands:
-            # Install pnpm globally
             - npm install -g pnpm@latest
-            # Install all dependencies from monorepo root
             - cd ../..
-            - pnpm install --frozen-lockfile
-            # Return to web package
-            - cd packages/web
+            - pnpm install --no-frozen-lockfile
         build:
           commands:
-            # Build the Next.js application
-            - pnpm run build
+            - cd packages/web
+            - pnpm build
       artifacts:
-        baseDirectory: .next
+        baseDirectory: packages/web/.next
         files:
           - '**/*'
       cache:
         paths:
-          - 'node_modules/**/*'
-          - '../../node_modules/**/*'
-          - '../cli/node_modules/**/*'
-          - '../worker/node_modules/**/*'
+          - node_modules/**/*
+          - packages/web/node_modules/**/*
