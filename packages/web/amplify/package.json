@@ -3,14 +3,13 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "tsc && node --enable-source-maps dist/backend.js",
-    "sandbox": "ampx sandbox",
-    "deploy": "ampx pipeline-deploy"
+    "build": "npx ampx generate",
+    "deploy": "npx ampx sandbox"
   },
   "dependencies": {
     "@aws-amplify/backend": "^1.0.0",
     "@aws-amplify/backend-cli": "^1.0.0",
-    "aws-cdk-lib": "^2.100.0",
+    "aws-cdk-lib": "^2.0.0",
     "constructs": "^10.0.0",
     "typescript": "^5.0.0"
   }

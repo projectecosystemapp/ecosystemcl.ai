@@ -10,20 +10,16 @@ applications:
             - pnpm install --no-frozen-lockfile
         build:
           commands:
-            - cd packages/web
             - pnpm build
       artifacts:
-        baseDirectory: packages/web/.next
+        baseDirectory: .next
         files:
           - '**/*'
       cache:
         paths:
           - node_modules/**/*
-          - packages/web/node_modules/**/*
     backend:
       phases:
         build:
           commands:
-            - pnpm install --no-frozen-lockfile
-            - cd amplify
-            - npx ampx generate --branch $AWS_BRANCH
+            - npx ampx generate --branch $AWS_BRANCH --app-id $AWS_APP_ID
