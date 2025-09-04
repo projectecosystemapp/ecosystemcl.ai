@@ -1,0 +1,73 @@
+name: AWS OIDC Provider Setup
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  setup-oidc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+
+      - name: Create GitHub OIDC Provider
+        run: |
+          # Check if OIDC provider exists
+          PROVIDER_ARN=$(aws iam list-open-id-connect-providers --query "OpenIDConnectProviderList[?ends_with(Arn, 'token.actions.githubusercontent.com')].Arn" --output text)
+          
+          if [ -z "$PROVIDER_ARN" ]; then
+            # Create OIDC provider
+            aws iam create-open-id-connect-provider \
+              --url https://token.actions.githubusercontent.com \
+              --thumbprint-list 6938fd4d98bab03faadb97b34396831e3780aea1 \
+              --client-id-list sts.amazonaws.com
+            echo "✅ OIDC Provider created"
+          else
+            echo "✅ OIDC Provider already exists: $PROVIDER_ARN"
+          fi
+
+      - name: Create IAM Role for GitHub Actions
+        run: |
+          cat > trust-policy.json <<EOF
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Federated": "arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:oidc-provider/token.actions.githubusercontent.com"
+                },
+                "Action": "sts:AssumeRoleWithWebIdentity",
+                "Condition": {
+                  "StringEquals": {
+                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+                  },
+                  "StringLike": {
+                    "token.actions.githubusercontent.com:sub": "repo:projectecosystemapp/ecosystemcl.ai:*"
+                  }
+                }
+              }
+            ]
+          }
+          EOF
+
+          # Create role
+          aws iam create-role \
+            --role-name ecosystemcl-github-actions \
+            --assume-role-policy-document file://trust-policy.json \
+            --description "Role for ECOSYSTEMCL.AI GitHub Actions" || true
+
+          # Attach policies
+          aws iam attach-role-policy \
+            --role-name ecosystemcl-github-actions \
+            --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
+
+          echo "✅ IAM Role configured for GitHub Actions"

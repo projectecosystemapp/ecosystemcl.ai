@@ -20,6 +20,33 @@ applications:
           - node_modules/**/*
     backend:
       phases:
+        preBuild:
+          commands:
+            - echo "=== ECOSYSTEMCL.AI Backend Pre-Build Phase ==="
+            - echo "Setting up environment for product provisioning..."
+            - cd ../..
+            - chmod +x provision_products.sh
+            - |
+              if [[ "${SKIP_PRODUCT_PROVISIONING:-false}" == "true" ]]; then
+                echo "SKIP_PRODUCT_PROVISIONING is set to true, skipping product provisioning"
+              elif [[ -n "${WHOP_SECRET_API_KEY:-}" ]]; then
+                echo "WHOP_SECRET_API_KEY is configured, running product provisioning..."
+                if ! ./provision_products.sh; then
+                  echo "WARNING: Product provisioning failed, but continuing with deployment..."
+                  echo "This is not a critical error for the Amplify build process"
+                  echo "Products can be provisioned manually after deployment"
+                  exit 0  # Don't fail the build
+                else
+                  echo "SUCCESS: Product provisioning completed successfully"
+                fi
+              else
+                echo "WHOP_SECRET_API_KEY not set, skipping product provisioning"
+                echo "To enable automatic product provisioning:"
+                echo "1. Set WHOP_SECRET_API_KEY in Amplify Console environment variables"
+                echo "2. Redeploy the application"
+                echo "Alternatively, run provision_products.sh manually after deployment"
+              fi
+            - echo "=== Pre-Build Phase Complete ==="
         build:
           commands:
             - npm install -g @aws-amplify/backend-cli@latest

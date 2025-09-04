@@ -1,0 +1,263 @@
+name: Verify Integration
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 8 * * *' # Daily at 8 AM UTC
+
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+jobs:
+  verify-aws-connection:
+    name: Verify AWS Connection
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ecosystemcl-github-actions
+          aws-region: us-west-2
+        continue-on-error: true
+        id: aws-creds
+
+      - name: Test AWS Access
+        if: steps.aws-creds.outcome == 'success'
+        run: |
+          echo "✅ AWS OIDC authentication successful"
+          aws sts get-caller-identity
+          aws s3 ls || echo "⚠️ S3 access limited"
+          aws dynamodb list-tables --max-items 1 || echo "⚠️ DynamoDB access limited"
+        
+      - name: Fallback to Access Keys
+        if: steps.aws-creds.outcome == 'failure'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+            echo "❌ No AWS credentials available"
+            exit 1
+          fi
+          echo "⚠️ Using fallback AWS access keys (not recommended)"
+          aws sts get-caller-identity
+
+  verify-secrets:
+    name: Verify Secrets Configuration
+    runs-on: ubuntu-latest
+    needs: verify-aws-connection
+    
+    steps:
+      - name: Check Required Secrets
+        run: |
+          MISSING_SECRETS=()
+          
+          # Check each required secret
+          [ -z "${{ secrets.AWS_ACCOUNT_ID }}" ] && MISSING_SECRETS+=("AWS_ACCOUNT_ID")
+          [ -z "${{ secrets.COGNITO_USER_POOL_ID }}" ] && MISSING_SECRETS+=("COGNITO_USER_POOL_ID")
+          [ -z "${{ secrets.AMPLIFY_APP_ID }}" ] && MISSING_SECRETS+=("AMPLIFY_APP_ID")
+          [ -z "${{ secrets.WHOP_SECRET_API_KEY }}" ] && MISSING_SECRETS+=("WHOP_SECRET_API_KEY")
+          
+          if [ ${#MISSING_SECRETS[@]} -gt 0 ]; then
+            echo "❌ Missing secrets: ${MISSING_SECRETS[*]}"
+            echo "Configure these in GitHub Settings > Secrets and variables > Actions"
+            exit 1
+          else
+            echo "✅ All required secrets configured"
+          fi
+
+  verify-infrastructure:
+    name: Verify Infrastructure
+    runs-on: ubuntu-latest
+    needs: verify-secrets
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ecosystemcl-github-actions
+          aws-region: us-west-2
+
+      - name: Verify DynamoDB Tables
+        run: |
+          echo "Checking DynamoDB tables..."
+          
+          # Check pattern table
+          if aws dynamodb describe-table --table-name HelixPatternEntries &>/dev/null; then
+            echo "✅ HelixPatternEntries table exists"
+            
+            # Check stream status
+            STREAM_STATUS=$(aws dynamodb describe-table \
+              --table-name HelixPatternEntries \
+              --query 'Table.StreamSpecification.StreamEnabled' \
+              --output text)
+            
+            if [ "$STREAM_STATUS" == "true" ]; then
+              echo "✅ DynamoDB Streams enabled"
+            else
+              echo "⚠️ DynamoDB Streams not enabled - run setup script"
+            fi
+          else
+            echo "❌ HelixPatternEntries table not found"
+          fi
+          
+          # Check workspace table
+          if aws dynamodb describe-table --table-name WorkspaceStates &>/dev/null; then
+            echo "✅ WorkspaceStates table exists"
+          else
+            echo "⚠️ WorkspaceStates table not found"
+          fi
+
+      - name: Verify Lambda Functions
+        run: |
+          echo "Checking Lambda functions..."
+          
+          FUNCTIONS=("ecosystemcl-helix-lookup" "ecosystemcl-cdc-processor" "ecosystemcl-plan")
+          
+          for func in "${FUNCTIONS[@]}"; do
+            if aws lambda get-function --function-name "$func" &>/dev/null; then
+              echo "✅ $func exists"
+              
+              # Check environment variables
+              ENV_VARS=$(aws lambda get-function-configuration \
+                --function-name "$func" \
+                --query 'Environment.Variables' \
+                --output json)
+              
+              if echo "$ENV_VARS" | jq -e '.HELIX_TABLE_NAME' &>/dev/null; then
+                echo "  ✅ Environment variables configured"
+              else
+                echo "  ⚠️ Missing environment variables"
+              fi
+            else
+              echo "⚠️ $func not found"
+            fi
+          done
+
+      - name: Verify API Gateway
+        run: |
+          echo "Checking API Gateway..."
+          
+          API_ID=$(aws apigatewayv2 get-apis \
+            --query "Items[?Name=='ecosystemcl-api'].ApiId | [0]" \
+            --output text)
+          
+          if [ -n "$API_ID" ] && [ "$API_ID" != "None" ]; then
+            echo "✅ API Gateway found: $API_ID"
+            
+            # Get endpoint
+            ENDPOINT=$(aws apigatewayv2 get-api \
+              --api-id "$API_ID" \
+              --query 'ApiEndpoint' \
+              --output text)
+            
+            echo "  Endpoint: $ENDPOINT"
+            
+            # Test health endpoint
+            if curl -f "$ENDPOINT/health" &>/dev/null; then
+              echo "  ✅ Health check passed"
+            else
+              echo "  ⚠️ Health check failed"
+            fi
+          else
+            echo "⚠️ API Gateway not found"
+          fi
+
+      - name: Verify S3 Buckets
+        run: |
+          echo "Checking S3 buckets..."
+          
+          # Check for artifacts bucket
+          if aws s3 ls | grep -q ecosystemcl-artifacts; then
+            echo "✅ Artifacts bucket exists"
+          else
+            echo "⚠️ Artifacts bucket not found"
+          fi
+          
+          # Check for CDK staging bucket
+          if aws s3 ls | grep -q cdk-; then
+            echo "✅ CDK staging bucket exists"
+          else
+            echo "⚠️ CDK staging bucket not found - run 'cdk bootstrap'"
+          fi
+
+      - name: Verify OpenSearch
+        run: |
+          echo "Checking OpenSearch..."
+          
+          if [ -n "${{ secrets.OPENSEARCH_ENDPOINT }}" ]; then
+            # Try to connect to OpenSearch
+            if curl -s "https://${{ secrets.OPENSEARCH_ENDPOINT }}/_cluster/health" &>/dev/null; then
+              echo "✅ OpenSearch cluster accessible"
+            else
+              echo "⚠️ OpenSearch cluster not accessible"
+            fi
+          else
+            echo "⚠️ OpenSearch endpoint not configured"
+          fi
+
+      - name: Verify Amplify
+        run: |
+          echo "Checking Amplify..."
+          
+          if [ -n "${{ secrets.AMPLIFY_APP_ID }}" ]; then
+            APP_STATUS=$(aws amplify get-app \
+              --app-id "${{ secrets.AMPLIFY_APP_ID }}" \
+              --query 'app.productionBranch.status' \
+              --output text 2>/dev/null || echo "")
+            
+            if [ -n "$APP_STATUS" ]; then
+              echo "✅ Amplify app found: ${{ secrets.AMPLIFY_APP_ID }}"
+              echo "  Status: $APP_STATUS"
+            else
+              echo "❌ Amplify app not accessible"
+            fi
+          else
+            echo "❌ Amplify app ID not configured"
+          fi
+
+      - name: Generate Report
+        if: always()
+        run: |
+          cat > integration-report.md <<EOF
+          # ECOSYSTEMCL.AI Integration Report
+          
+          ## Timestamp
+          $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          
+          ## GitHub Configuration
+          - Repository: ${{ github.repository }}
+          - Branch: ${{ github.ref_name }}
+          - Workflow: ${{ github.workflow }}
+          
+          ## AWS Resources Status
+          Check the job logs above for detailed status of:
+          - DynamoDB Tables
+          - Lambda Functions
+          - API Gateway
+          - S3 Buckets
+          - OpenSearch
+          - Amplify
+          
+          ## Action Items
+          Review any ⚠️ or ❌ items in the logs above and run the appropriate setup scripts.
+          EOF
+          
+          echo "📊 Integration report generated"
+
+      - name: Upload Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-report
+          path: integration-report.md
+          retention-days: 30

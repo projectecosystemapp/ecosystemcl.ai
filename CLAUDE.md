@@ -1,71 +1,116 @@
-- Of course. This is the most important conversation to have. A tool is worthless if it doesn't solve the core problems of a senior developer, and the biggest problem is that most AI tools are fundamentally useless on a real-world, large-scale codebase.
+# CLAUDE.md
 
-You've asked for a complete rebrand to ECOSYSTEMCL.AI. Done. All references to the old name are gone.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Let's start with the human-language breakdown. This is how I would explain ECOSYSTEMCL.AI to a skeptical, talented developer who has been burned by AI before.
+## Project Overview
 
-The Pitch: Explaining ECOSYSTEMCL.AI to a Skeptical Developer
-(The conversation would start by acknowledging their valid frustration)
+ECOSYSTEMCL.AI is a multi-agent AI development platform built as a pnpm monorepo with AWS Amplify Gen 2 backend. The platform orchestrates specialized AI agents for autonomous development tasks with persistent memory and parallel execution capabilities.
 
-"You're 100% right. Most AI development tools are fundamentally broken for real-world, large-scale engineering. I've seen it, you've seen it. They fail for one simple reason: they are brilliant interns with terminal amnesia.
+## Essential Commands
 
-They have no long-term memory. They don't understand the architectural decision you made six months ago to use a message queue for inter-service communication. They don't know that the LegacyUserService is deprecated and all new authentication logic must go through the AuthGateway. They have no context beyond the few hundred lines of code you just pasted in.
+### Development
+```bash
+# Install dependencies (uses pnpm workspace)
+pnpm install
 
-So, they give you generic, out-of-context, often-wrong boilerplate that you spend more time fixing than if you had just written it yourself. It's a waste of a senior developer's time.
+# Run web app locally
+pnpm dev  # or pnpm --filter web dev
 
-That's why we built ECOSYSTEMCL.AI.
+# Build all packages
+pnpm build
 
-It isn't a chatbot that writes code. It's an orchestration platform for a persistent, context-aware team of AI agents that live and evolve inside your project.
+# Type checking
+pnpm type-check
 
-It's designed from the ground up to solve the amnesia problem. Here’s how it actually works.
+# Linting
+pnpm lint
 
-Step 1: Your Project Gets a "Living Memory"
-The first time you run eco init in your repository, it creates a hidden .eco_workspace folder. This is the Local Brain. It's not just a config folder; it's where the agent team begins to learn your project. They read your package.json, your tsconfig.json, your linter rules, your CI/CD pipeline definitions. They index the structure of your code to understand how you build components. This folder becomes the agent team's workbench, right on your machine.
+# Run tests
+pnpm test
+pnpm test:coverage  # for coverage report
+```
 
-But more importantly, every time you complete a task, the key takeaways—the architectural decisions ("We chose Redis for caching because..."), the patterns used, and summaries of the changes—are pushed to a secure Cloud Brain. This is a combination of a traditional database, a high-speed cache for working memory, and a vector store for semantic understanding of your code.
+### Amplify Backend
+```bash
+# Generate Amplify client code
+npx ampx generate --branch main
 
-This two-tiered memory system is the foundation. It remembers that six months ago, you decided against using Redux for state management, and more importantly, it remembers why.
+# Deploy backend (from packages/web)
+cd packages/web && npx ampx sandbox  # for development
+cd packages/web && npx ampx push      # for production
+```
 
-Step 2: A Team of Specialists Deliberates on Your Goal
-Let's walk through a realistic, complex task that would make other AI tools fall apart.
+### Git Hooks
+Pre-commit hooks are configured via Husky. They run automatically on commit.
 
-You run this in your terminal:
-eco plan "Implement a new 'Auditor' user role with read-only access to financial reports and user activity logs."
+## Architecture
 
-Here’s what happens next:
+### Monorepo Structure
+- `packages/web/` - Next.js 15 frontend with Amplify UI components
+- `packages/infra/` - AWS CDK infrastructure definitions
+- `packages/web/amplify/` - Amplify Gen 2 backend configuration
+  - `backend.ts` - Main backend definition with auth, data, and Lambda functions
+  - `data/resource.ts` - GraphQL data schema with models for UserProfile, Workspace, Plan, ApiKey, and SubscriptionEvent
+  - `functions/` - Lambda functions for forge-execute, post-confirmation, and whop-webhook
 
-A) The System Thinks First: Instead of a single "Code Generator" agent blindly starting to write code, a Master Control Program (MCP)—think of it as an AI senior architect—takes the goal.
+### Key Backend Components
+1. **Authentication**: AWS Cognito with post-confirmation Lambda for user provisioning
+2. **Data Layer**: DynamoDB via Amplify Data with owner-based authorization
+3. **Subscription Management**: Whop.com webhook integration for payment processing
+4. **Lambda Functions**:
+   - `forge-execute`: Main task execution handler
+   - `post-confirmation`: User provisioning after signup
+   - `whop-webhook`: Handles subscription events from Whop
 
-B) It Consults the Memory: Its first action is to query the Cloud Brain:
+### Frontend Architecture
+- Next.js 15 with App Router
+- AWS Amplify UI components for auth
+- Tailwind CSS v4 for styling
+- Testing with Vitest and React Testing Library
 
-"What is our current pattern for user roles and permissions? (Reads from a past plan)"
+## Working with the Codebase
 
-"Which database tables are related to 'financial reports' and 'activity logs'? (Semantic query of the codebase embeddings)"
+### Data Models
+The platform uses Amplify Data (GraphQL) with these main models:
+- `UserProfile`: User subscription and credit management
+- `Workspace`: Project organization containers
+- `Plan`: Task execution tracking
+- `ApiKey`: Encrypted API key storage
+- `SubscriptionEvent`: Audit trail for subscription changes
 
-"Are there any security constraints around PII in activity logs? (Reads from the Workspace State)"
+### Authentication Flow
+1. User signs up via Amplify Auth (Cognito)
+2. Post-confirmation Lambda creates UserProfile
+3. Whop webhook updates subscription status
+4. Frontend checks auth state and subscription tier
 
-C) It Forms a Committee of Specialists: Based on the goal, the MCP convenes a virtual meeting of the exact agents needed for the job: a DatabaseExpert, a SecurityAuditor, and a BackendAPIDesigner.
+### Testing Strategy
+- Unit tests with Vitest for components and utilities
+- Coverage threshold enforcement
+- Test files alongside source files (`.test.ts` or `.spec.ts`)
 
-D) They Deliberate (You Can See This Happen): This is the magic. The agents have a quick, simulated conversation to identify conflicts before any work starts.
+## CI/CD Pipeline
 
-DatabaseExpert: "Okay, this requires a new roles table and a user_roles join table. The financial_reports will need a permission check against this new role."
+GitHub Actions workflows handle:
+- **CI**: Runs on PRs - lint, type-check, test for all packages
+- **Deploy**: Production deployment via AWS Amplify
+- **CodeQL**: Security analysis
+- **Secrets Sync**: AWS Systems Manager parameter synchronization
 
-SecurityAuditor: "Hold on. The activity logs contain user IP addresses. The 'Auditor' role must never see raw PII. The database query must explicitly exclude or mask those columns for this role."
+## Important Context from Existing Documentation
 
-BackendAPIDesigner: "Got it. I'll design a new middleware for the /reports and /logs endpoints that enforces the security policy from the SecurityAuditor."
+### Multi-Agent System Design
+The platform implements a Master Control Program (MCP) that orchestrates specialized agents. Each agent has specific capabilities and the system maintains both local (.eco_workspace) and cloud-based memory for context persistence.
 
-E) An Actionable, Parallel Plan is Formed: The MCP approves a final plan, which is no longer a simple list but a dependency graph. It then dispatches the DatabaseExpert and BackendAPIDesigner to work in parallel. You see both streams of progress in your terminal. Only when both of them are done does it dispatch the TestWriter to write the integration tests for the new role.
+### Local vs Cloud Execution
+- **Cloud**: Production environment using AWS Lambda, SQS, and DynamoDB
+- **Local**: CLI-driven development using git worktrees for parallel agent execution
 
-Step 3: You Are Always in Control
-This isn't a black box that you just have to trust. You have complete control.
+### Community Agent Marketplace (Planned)
+Future feature to allow users to create, share, and monetize custom agents with a registry in DynamoDB and storage in S3.
 
-You Own the Keys: You can use our platform-optimized credits, or you can bring your own API keys (BYOK) via a secure OAuth connection. You can even mix and match: use your expensive GPT-4o key for critical code generation, but use our cheaper platform credits for research and summarization, all within the same plan.
-
-You Tune the Agents: Don't like how an agent is behaving? Open the .eco_workspace folder. Its entire personality, its core instructions, are in a Markdown file. You can edit the prompt to tune its behavior for your specific project. You are the ultimate manager of your agent team.
-
-You Give Final Approval: For critical steps like deploying to production or making a destructive database change, you can configure the plan to pause and wait for your manual approval. The web UI will show you a diff of the proposed changes, and you give the final go/no-go.
-
-The Result
-The final output isn't a single, monolithic, probably-wrong code dump. It's a series of small, targeted, context-aware commits or pull requests that respect your project's existing patterns, because for the first time, the AI system actually remembers them.
-
-So, ECOSYSTEMCL.AI is designed from the ground up to solve the amnesia problem. It remembers, it deliberates, it collaborates, and you're always the architect-in-chief. CHANGE ANY REFERENCES TO THE NAME FORGE TO ECOSYSTEMCL.AI
+## Security Considerations
+- API keys are encrypted before storage
+- Whop webhooks are verified using secret signatures
+- All data access uses owner-based authorization
+- Sensitive operations require subscription tier checks

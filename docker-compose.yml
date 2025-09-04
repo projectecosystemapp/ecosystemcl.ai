@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.10
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    environment:
+      CLICKHOUSE_DB: tensorzero
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: password
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  tensorzero:
+    image: tensorzero/tensorzero:latest
+    ports:
+      - "8080:8080"
+    environment:
+      TENSORZERO_CONFIG_PATH: /config/tensorzero.yaml
+      CLICKHOUSE_URL: http://clickhouse:8123/tensorzero
+      # API keys will be set via .env file
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+    volumes:
+      - ./tensorzero-config.yaml:/config/tensorzero.yaml:ro
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    restart: unless-stopped
+
+  tensorzero-ui:
+    image: tensorzero/ui:latest
+    ports:
+      - "3001:3000"
+    environment:
+      TENSORZERO_API_URL: http://tensorzero:8080
+      CLICKHOUSE_URL: http://clickhouse:8123/tensorzero
+    depends_on:
+      - tensorzero
+      - clickhouse
+
+volumes:
+  clickhouse-data:

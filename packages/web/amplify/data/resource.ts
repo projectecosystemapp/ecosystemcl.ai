@@ -1,12 +1,19 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
 
 const schema = a.schema({
-  // User profiles and tier management
+  // User profiles and subscription management
   UserProfile: a
     .model({
       userId: a.id().required(),
       email: a.email().required(),
+      // Legacy field for backward compatibility
       tier: a.enum(['starter', 'pro', 'team', 'enterprise']),
+      // New subscription fields
+      whopSubscriptionId: a.string(),
+      subscriptionStatus: a.enum(['active', 'trialing', 'cancelled', 'past_due']),
+      subscriptionTier: a.enum(['developer', 'architect', 'enterprise']),
+      trialEndsAt: a.datetime(),
+      subscriptionEndsAt: a.datetime(),
       credits: a.integer(),
       apiKeys: a.json(), // Encrypted API keys
       workspaces: a.string().array(),
@@ -48,6 +55,23 @@ const schema = a.schema({
       isActive: a.boolean(),
     })
     .authorization((allow) => [allow.owner()]),
+
+  // Subscription audit trail
+  SubscriptionEvent: a
+    .model({
+      eventId: a.id().required(),
+      userId: a.string().required(),
+      whopSubscriptionId: a.string(),
+      eventType: a.enum(['subscription_created', 'subscription_updated', 'subscription_cancelled', 'subscription_renewed', 'trial_started', 'trial_ended', 'payment_succeeded', 'payment_failed']),
+      fromStatus: a.string(),
+      toStatus: a.string(),
+      fromTier: a.string(),
+      toTier: a.string(),
+      metadata: a.json(), // Additional event data
+      timestamp: a.datetime().required(),
+      source: a.enum(['whop_webhook', 'admin_action', 'user_action', 'system_automation']),
+    })
+    .authorization((allow) => [allow.owner(), allow.groups(['admin']).to(['read', 'create', 'update', 'delete'])]),
 });
 
 export type Schema = ClientSchema<typeof schema>;

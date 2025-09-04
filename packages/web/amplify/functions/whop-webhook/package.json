@@ -1,0 +1,23 @@
+{
+  "name": "whop-webhook",
+  "version": "1.0.0",
+  "description": "Whop webhook handler for ECOSYSTEMCL.AI subscription management",
+  "main": "handler.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@aws-amplify/backend": "^1.0.0",
+    "aws-amplify": "^6.0.0",
+    "aws-lambda": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": ["aws", "lambda", "webhook", "whop", "subscription"],
+  "author": "ECOSYSTEMCL.AI",
+  "license": "MIT"
+}
