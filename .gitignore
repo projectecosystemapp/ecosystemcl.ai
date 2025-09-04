@@ -70,3 +70,5 @@ logs/
 **/credentials.json
 **/*.pem
 **/*.key
+node_modules/
+packages/*/dist/

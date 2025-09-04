@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.processForgeJob = processForgeJob;
+exports.processForgeJob = void 0;
 const dockerode_1 = __importDefault(require("dockerode"));
 const lib_1 = require("./lib");
 const child_process_1 = require("child_process");
@@ -173,3 +173,4 @@ async function processForgeJob(job) {
         throw error; // Re-throw for BullMQ retry logic
     }
 }
+exports.processForgeJob = processForgeJob;

@@ -1,99 +1,161 @@
 # ECOSYSTEMCL.AI Copilot Instructions
 
-Welcome, agent. This document provides the essential knowledge to be productive in the ECOSYSTEMCL.AI codebase. This is a `pnpm` monorepo containing a web app, a CLI, and backend workers for a multi-agent AI development platform.
+**ALWAYS FOLLOW THESE INSTRUCTIONS FIRST** and only fallback to additional search and context gathering if the information in these instructions is incomplete or found to be in error.
 
-## 1. Core Architecture: Cloud vs. Local
+This is a `pnpm` monorepo containing a web app (Next.js), CLI tool (Node.js), and backend workers for a multi-agent AI development platform.
 
-There are two distinct execution models. Understanding which you're working in is critical.
+## Bootstrap and Setup Commands
 
-### a. Cloud Architecture (AWS Native)
+Run these commands in the repository root (`/home/runner/work/ecosystemcl.ai/ecosystemcl.ai`):
 
-This is the production environment, defined entirely in `amplify/backend.ts` using AWS CDK.
+```bash
+# Install pnpm globally if not available
+npm install -g pnpm@10.15.1
 
-- **Entrypoint**: An API Gateway (`ecosystem-api`) receives requests (e.g., to `/plans/execute`).
-- **Orchestration**: A central AWS Lambda function (`ecosystem-orchestrator`) runs the agentic logic. The code for this lambda comes from the `packages/worker` project.
-- **Job Management**: The orchestrator pushes jobs to an SQS queue (`ecosystem-agent-jobs`).
-- **State & Memory**: The "Cloud Brain" uses DynamoDB tables to store agent state, workspace data, and plan execution history. See `AgentStateTable`, `WorkspaceTable`, and `PlanExecutionTable` in `amplify/backend.ts`.
-- **AI Models**: The system invokes foundation models (e.g., Claude) via AWS Bedrock. Permissions are managed by IAM roles.
+# Install all dependencies (takes ~18 seconds)
+# NEVER CANCEL: Set timeout to 60+ seconds
+pnpm install
+```
 
-**Key File**: `amplify/backend.ts` is the source of truth for all backend infrastructure. To understand data flows, service boundaries, or add new infrastructure, start here.
+## Working Commands (Validated)
 
-### b. Local Architecture (CLI-driven)
+### Development Server
+```bash
+# Start web development server (Next.js)
+# NEVER CANCEL: Takes ~1.4 seconds to start, set timeout to 30+ seconds
+pnpm dev
+# Serves at http://localhost:3000
+```
 
-This is for local development and auditing, orchestrated by the `packages/cli` tool.
+### CLI Tool
+```bash
+# Make CLI globally available
+cd packages/cli && npm link
 
-- **Entrypoint**: The user runs a command like `ecosystemcli plan "..."`.
-- **Orchestration**: `packages/cli/src/pipeline.js` defines the `AuditPipeline`.
-- **Parallelism**: This pipeline uses a unique pattern: it creates a `git worktree` for each parallel task. This isolates file system changes for each agent, which are later merged. This is crucial for running agents on a local codebase without conflicts.
-- **Session Management**: The CLI maintains session state and checkpoints in the `.forge/sessions` directory to allow for resuming failed or long-running tasks.
+# Test CLI functionality (works without authentication for some commands)
+ecosystemcli --help
+ecosystemcli status      # Shows authentication status
+ecosystemcli agents     # Lists available specialist agents (works without auth)
+ecosystemcli init --help # Shows workspace initialization help
+```
 
-**Key File**: `packages/cli/src/pipeline.js` explains the entire local execution flow, from task decomposition to worktree management and result integration.
+## Commands That Currently Fail (Known Issues)
 
-## 2. Key Components & Data Flow
+### Build Commands - DO NOT USE
+```bash
+# These commands FAIL and should NOT be used:
+pnpm build              # Fails: amplify config missing + 41 TypeScript errors in worker
+pnpm -F web build       # Fails: missing @clerk/nextjs and amplify configuration  
+pnpm -F worker build    # Fails: 41 TypeScript compilation errors
+```
 
-- `packages/web`: The Next.js frontend. The most important logic is in `packages/web/src/lib`.
-  - `lib/mcp-server.ts`: Defines the `MCPServer` (Master Control Program). This class orchestrates the `PlannerAgent` and `CriticAgent` to generate and evaluate multi-step plans before execution. This is the high-level "thinking" process of the system.
-- `packages/worker`: The background job processor for the cloud environment.
-  - `src/index.ts`: Configures the BullMQ worker to listen to the Redis queue.
-  - `src/processor.ts`: Contains the logic to process a single job. This is where an individual agent's task is executed in the cloud.
-- `packages/cli`: The command-line interface.
-  - `src/agentDispatcher.js`: Handles the invocation of individual agents.
-  - `agents/*.yaml`: Declarative definitions for different specialized agents.
+**Why builds fail:**
+- Worker package: 41 TypeScript errors including missing dependencies (@aws-sdk/client-lambda, @types/opossum, nock)
+- Web package: Missing Amplify configuration, @clerk/nextjs dependency issues
+- Amplify generation requires specific parameters not configured
 
-## 3. Developer Workflows & Conventions
+### Test Commands - DO NOT USE
+```bash
+# These test commands FAIL and should NOT be used:
+pnpm test               # Fails: missing @vitejs/plugin-react and configuration issues
+pnpm -F web test        # Fails: vitest config cannot find @vitejs/plugin-react
+pnpm -F cli test        # Fails: no tests found (returns exit code 1)
+```
 
-- **Setup**: This is a `pnpm` workspace. Run `pnpm install` in the root.
-- **Making Backend Changes**:
-  1. Modify the CDK constructs in `amplify/backend.ts`.
-  2. Deploy by running an Amplify push command, which will provision the resources in AWS.
-- **Running Local Agent Tasks**:
-  - Use the CLI: `ecosystemcli plan "your task"`.
-  - Be aware this will create `git worktree` directories in the parent folder (`../worktree-*`). This is expected.
-- **Testing**: The web package uses `vitest`. Run tests within `packages/web` via `pnpm test`.
+### Lint Commands - PARTIALLY WORK
+```bash
+# Web linting works but has 4097 problems (289 errors, 3808 warnings)
+pnpm -F web lint        # Runs but shows many issues - use --fix for some fixes
 
-## 4. Critical Patterns
+# CLI linting fails - no ESLint config
+pnpm -F cli lint        # Fails: no configuration file found
+```
 
-- **Infrastructure as Code**: All AWS resources are defined in `amplify/backend.ts`. Do not create resources manually in the AWS console.
-- **Agent Planning**: Before execution, a plan is generated and evaluated by a `PlannerAgent` and `CriticAgent` (`packages/web/src/lib/mcp-server.ts`). This deliberation phase is a core concept.
-- **Local Parallel Execution**: When modifying the CLI, respect the `git worktree` pattern in `pipeline.js` for running agents in parallel. This prevents race conditions when modifying local files.
+## Validation Scenarios
 
-## 5. Operational Recovery (OpenSearch + CDC)
+### ALWAYS test basic web functionality after making changes:
+1. Start development server: `pnpm dev`
+2. Verify server starts at http://localhost:3000 in ~1.4 seconds
+3. **Expected**: Server starts but shows Next.js build error due to missing AWS Amplify adapter configuration (this is normal)
+4. Test CLI help command: `ecosystemcli --help`
+5. List available agents: `ecosystemcli agents` (works without authentication)
+6. Check authentication status: `ecosystemcli status`
 
-For urgent recovery in dev/prod:
-- Run `scripts/emergency-recovery.sh` to (a) create/update the OpenSearch index using `scripts/opensearch/index-mapping.json`, (b) start DLQ → source re-drive, and (c) canary-invoke the CDC Lambda.
-- Validate with `scripts/validate-recovery.sh` (checks index reachability, DLQ empty, and CDC logs clean).
-- See `docs/operations/emergency-recovery.md` for env vars and troubleshooting.
+### NEVER CANCEL Commands and Timeouts:
+- `pnpm install`: Set timeout to 60+ seconds (typically takes 18 seconds)
+- `pnpm dev`: Set timeout to 30+ seconds (typically takes 1.4 seconds)
+- Any build attempts: Set timeout to 120+ seconds (but expect failures)
 
-## 6. Roadmap: Community Agent Marketplace (Phased)
+## Project Structure
 
-- Phase 1 (Backend foundation): Add `CommunityAgentsTable` (DynamoDB) and `AgentConfigsBucket` (S3) in `amplify/backend.ts`.
-- Phase 2 (Publishing flow): Implement `ecosystemcli agent publish` (packages/cli) and `/marketplace/publish` + `PublishAgentLambda` (packages/worker).
-- Phase 3 (Consumption flow): Extend `MCPServer` to use community agents, add Marketplace UI (packages/web), and `ecosystemcli config pull` to sync into `.eco_workspace/community/`.
-## 5. The Community Agent Marketplace (Vision)
+### packages/web (Next.js Frontend)
+- **Status**: Development server works, build fails
+- **Key files**: 
+  - `src/lib/mcp-server.ts`: Master Control Program orchestration
+  - `src/app/`: Next.js app router pages
+- **Issues**: Missing Amplify configuration, Clerk authentication setup
 
-The next major evolution is to build a "GitHub for AI Agents." This will transform the platform into a self-expanding ecosystem.
+### packages/worker (TypeScript Backend)
+- **Status**: Multiple TypeScript compilation errors
+- **Key files**:
+  - `src/index.ts`: BullMQ worker configuration  
+  - `src/processor.ts`: Job processing logic
+- **Issues**: 41 TypeScript errors, missing AWS SDK dependencies
 
-### a. The Vision
+### packages/cli (Node.js CLI)
+- **Status**: Functional but requires authentication
+- **Key files**:
+  - `bin/ecosystemcli`: CLI entry point
+  - `src/pipeline.js`: Audit pipeline with git worktree pattern
+- **Issues**: No tests, missing ESLint configuration
 
-- **Core Idea**: Any user can create, share, and monetize specialized agents.
-- **Consumers**: Discover and "install" community agents from a marketplace in the web app. An `ecosystemcli config pull` command syncs the agents to the local workspace.
-- **Creators**: Publish agents using `ecosystemcli agent publish`. They can set monetization rules (Free, Tier-Gated, or Credit-Based Revenue Share).
+## Critical Development Patterns
 
-### b. Marketplace Architecture
+### Infrastructure as Code
+- All AWS resources defined in `amplify/backend.ts` (if it exists)
+- Do not create resources manually in AWS console
 
-- **Agent Registry**: A new DynamoDB table (`CommunityAgentsTable`) will store agent metadata (author, version, popularity, monetization rules).
-- **Agent Storage**: A new S3 bucket (`AgentConfigsBucket`) will store the agent definition files (`agent.yaml`, `prompt.md`).
-- **Publishing API**: A new API Gateway endpoint (`POST /marketplace/publish`) will trigger a Lambda (`PublishAgentLambda`) to handle validation and publishing logic.
-- **Monetization Engine**: A transactional system will manage credit transfers between agent consumers and creators.
+### Git Worktree Pattern
+- CLI creates `git worktree` directories for parallel agent execution
+- Expect `../worktree-*` directories when running CLI commands
+- This isolates file system changes per agent
 
-### c. Implementation Flow
+### Authentication Required
+- CLI commands that modify code require authentication: `ecosystemcli login`
+- Some commands work without authentication: `ecosystemcli agents`, `ecosystemcli --help`, `ecosystemcl init --help`
+- Status shows: "Not authenticated" until login completed
 
-1.  **Phase 1: Backend Foundation (in `amplify/backend.ts`)**:
-    - Define the `CommunityAgentsTable` (DynamoDB) and `AgentConfigsBucket` (S3).
-2.  **Phase 2: Publishing Flow (in `packages/cli` and `packages/worker`)**:
-    - Implement the `ecosystemcli agent publish` command.
-    - Create the `PublishAgentLambda` and the `/marketplace/publish` API endpoint.
-3.  **Phase 3: Consumption Flow (in `packages/web` and `packages/cli`)**:
-    - Enhance the `MCPServer` to query for and use community agents.
-    - Build the marketplace UI for discovery and installation.
-    - Implement `ecosystemcli config pull` to sync agents locally into `.eco_workspace/community/`.
+## Emergency Recovery Scripts
+```bash
+# For production issues (if scripts exist):
+./scripts/emergency-recovery.sh
+./scripts/validate-recovery.sh
+```
+
+## Common Development Workflow
+
+1. **Start fresh development session:**
+   ```bash
+   pnpm install  # 18 seconds, timeout 60s
+   pnpm dev      # 1.4 seconds, timeout 30s
+   ```
+
+3. **Test CLI functionality:**
+   ```bash
+   cd packages/cli && npm link
+   ecosystemcli --help     # Works
+   ecosystemcli agents     # Lists 7 specialist agents
+   ecosystemcli init --help # Shows workspace options
+   ```
+
+3. **DO NOT attempt to build or test** - these commands are currently broken
+
+4. **Always manually verify web server starts** at http://localhost:3000 (expect Amplify configuration error - this is normal)
+
+## Repository State Summary
+
+✅ **Working**: pnpm install, web dev server, CLI help/status  
+❌ **Broken**: build commands, test suites, linting (partially)  
+⚠️  **Requires Setup**: authentication, Amplify configuration, missing dependencies
+
+When working in this codebase, focus on development server functionality and CLI behavior. Avoid build/test commands until the underlying TypeScript and configuration issues are resolved.
