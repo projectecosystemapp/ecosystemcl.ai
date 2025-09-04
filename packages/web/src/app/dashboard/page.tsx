@@ -1,8 +1,6 @@
-import { getCurrentUser } from 'aws-amplify/auth/server';
-import { redirect } from "next/navigation";
-import { cookies } from 'next/headers';
-import { runWithAmplifyServerContext } from 'aws-amplify/adapter-nextjs';
-import outputs from '../../../amplify_outputs.json';
+'use client';
+
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,15 +16,21 @@ import {
   CheckCircle,
   AlertCircle
 } from "lucide-react";
+import { useAuthenticator } from '@aws-amplify/ui-react';
+import { useEffect } from 'react';
 
-export default async function DashboardPage() {
-  const user = await runWithAmplifyServerContext({
-    nextServerContext: { cookies },
-    operation: (contextSpec) => getCurrentUser(contextSpec)
-  }).catch(() => null);
+export default function DashboardPage() {
+  const { user } = useAuthenticator((context) => [context.user]);
+  const router = useRouter();
   
+  useEffect(() => {
+    if (!user) {
+      router.push('/auth');
+    }
+  }, [user, router]);
+
   if (!user) {
-    redirect("/auth");
+    return <div>Loading...</div>;
   }
 
   // Mock data - replace with real data from your API

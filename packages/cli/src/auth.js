@@ -210,25 +210,25 @@ class EcosystemAuth {
           const errorCode = error.response.data.error;
           
           switch (errorCode) {
-            case 'authorization_pending':
-              // Still waiting for user authorization
-              process.stdout.write('.');
-              continue;
+          case 'authorization_pending':
+            // Still waiting for user authorization
+            process.stdout.write('.');
+            continue;
               
-            case 'slow_down':
-              // Too many requests, slow down
-              slowDown = true;
-              process.stdout.write('_');
-              continue;
+          case 'slow_down':
+            // Too many requests, slow down
+            slowDown = true;
+            process.stdout.write('_');
+            continue;
               
-            case 'access_denied':
-              throw new Error('Authorization was denied');
+          case 'access_denied':
+            throw new Error('Authorization was denied');
               
-            case 'expired_token':
-              throw new Error('Device code expired. Please try again.');
+          case 'expired_token':
+            throw new Error('Device code expired. Please try again.');
               
-            default:
-              throw new Error(error.response.data.error_description || 'Authorization failed');
+          default:
+            throw new Error(error.response.data.error_description || 'Authorization failed');
           }
         } else {
           // Network or other error
@@ -464,7 +464,9 @@ class EcosystemAuth {
         // Clear invalid credentials
         try {
           await fs.unlink(this.configFile);
-        } catch {}
+        } catch (unlinkError) {
+          // Ignore file deletion errors
+        }
       } else {
         console.error(chalk.red('Failed to refresh token:'), error.message);
       }

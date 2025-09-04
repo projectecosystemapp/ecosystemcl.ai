@@ -153,7 +153,7 @@ class AuditPipeline {
    * Main entry point for the audit pipeline
    */
   async execute(tasks) {
-    console.log(chalk.bold.cyan(`\n🚀 Starting Audit Pipeline`));
+    console.log(chalk.bold.cyan('\n🚀 Starting Audit Pipeline'));
     console.log(chalk.gray(`   Mode: ${this.mode}`));
     console.log(chalk.gray(`   Parallelism: ${this.parallelism}`));
     console.log(chalk.gray(`   Tasks: ${tasks.length}`));
@@ -215,7 +215,7 @@ class AuditPipeline {
   /**
    * Find target files for granular analysis
    */
-  async findTargetFiles(target, pattern = '*.{ts,tsx,js,jsx}') {
+  async findTargetFiles(target, _pattern = '*.{ts,tsx,js,jsx}') {
     try {
       const { stdout } = await execAsync(`find ${target} -type f \\( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \\) | grep -v node_modules | head -20`);
       return stdout.trim().split('\n').filter(f => f.length > 0);
@@ -478,7 +478,7 @@ class AuditPipeline {
       try {
         // Attempt to merge the branch
         console.log(`   Merging ${task.branch}...`);
-        const { stdout, stderr } = await execAsync(`git merge ${task.branch} --no-edit`, {
+        await execAsync(`git merge ${task.branch} --no-edit`, {
           maxBuffer: 10 * 1024 * 1024
         });
         
@@ -519,7 +519,7 @@ class AuditPipeline {
    * Generate final report and create PR
    */
   async finalizeAudit(integration) {
-    console.log(`\n📊 Audit Summary:`);
+    console.log('\n📊 Audit Summary:');
     console.log(`   ✅ Successful merges: ${integration.successful.length}`);
     console.log(`   ❌ Failed tasks: ${integration.failed.length}`);
     console.log(`   ⚠️  Conflicts: ${integration.conflicts.length}`);
@@ -527,7 +527,7 @@ class AuditPipeline {
     console.log(`   🐛 Issues found: ${integration.totalIssues}`);
 
     if (integration.conflicts.length > 0) {
-      console.log(`\n⚠️  Manual intervention required for conflicts:`);
+      console.log('\n⚠️  Manual intervention required for conflicts:');
       integration.conflicts.forEach(c => {
         console.log(`   - ${c.branch}: ${c.conflict.split('\n')[0]}`);
       });
@@ -535,7 +535,7 @@ class AuditPipeline {
 
     if (this.mode === 'autonomous' && integration.successful.length > 0) {
       // Create PR automatically
-      console.log(`\n🔄 Creating pull request...`);
+      console.log('\n🔄 Creating pull request...');
       
       const prBody = this.generatePRBody(integration);
       
@@ -551,7 +551,7 @@ class AuditPipeline {
       } catch (error) {
         console.log(`\n⚠️  Could not create PR automatically: ${error.message}`);
         console.log(`   Branch pushed to: ${integration.integrationBranch}`);
-        console.log(`   Create PR manually from this branch`);
+        console.log('   Create PR manually from this branch');
       }
     }
   }
@@ -560,10 +560,10 @@ class AuditPipeline {
    * Generate PR body with comprehensive report
    */
   generatePRBody(integration) {
-    let body = `## 🤖 Automated Audit Report\n\n`;
-    body += `This PR contains automated fixes and findings from parallel agent analysis.\n\n`;
+    let body = '## 🤖 Automated Audit Report\n\n';
+    body += 'This PR contains automated fixes and findings from parallel agent analysis.\n\n';
     
-    body += `### 📊 Summary\n`;
+    body += '### 📊 Summary\n';
     body += `- **Successful tasks:** ${integration.successful.length}\n`;
     body += `- **Failed tasks:** ${integration.failed.length}\n`;
     body += `- **Conflicts requiring review:** ${integration.conflicts.length}\n`;
@@ -571,7 +571,7 @@ class AuditPipeline {
     body += `- **Issues identified:** ${integration.totalIssues}\n\n`;
     
     if (integration.successful.length > 0) {
-      body += `### ✅ Completed Tasks\n`;
+      body += '### ✅ Completed Tasks\n';
       integration.successful.forEach(task => {
         body += `- **${task.task}** (${task.branch})\n`;
         if (task.changes.length > 0) {
@@ -581,11 +581,11 @@ class AuditPipeline {
           body += `  - Issues found: ${task.issues.length}\n`;
         }
       });
-      body += `\n`;
+      body += '\n';
     }
     
     if (integration.totalIssues > 0) {
-      body += `### 🐛 Issues Found\n`;
+      body += '### 🐛 Issues Found\n';
       integration.successful.forEach(task => {
         if (task.issues && task.issues.length > 0) {
           task.issues.forEach(issue => {
@@ -593,22 +593,22 @@ class AuditPipeline {
           });
         }
       });
-      body += `\n`;
+      body += '\n';
     }
     
     if (integration.failed.length > 0) {
-      body += `### ❌ Failed Tasks\n`;
+      body += '### ❌ Failed Tasks\n';
       integration.failed.forEach(task => {
         body += `- **${task.task}**: ${task.error}\n`;
       });
-      body += `\n`;
+      body += '\n';
     }
     
-    body += `### 🔍 Review Instructions\n`;
-    body += `1. Review all changes carefully\n`;
-    body += `2. Run tests locally: \`npm test\`\n`;
-    body += `3. Check for any breaking changes\n`;
-    body += `4. Merge when CI passes\n`;
+    body += '### 🔍 Review Instructions\n';
+    body += '1. Review all changes carefully\n';
+    body += '2. Run tests locally: `npm test`\n';
+    body += '3. Check for any breaking changes\n';
+    body += '4. Merge when CI passes\n';
     
     return body;
   }
@@ -617,7 +617,7 @@ class AuditPipeline {
    * Clean up worktrees and temporary branches
    */
   async cleanup() {
-    console.log(`\n🧹 Cleaning up worktrees...`);
+    console.log('\n🧹 Cleaning up worktrees...');
     
     for (const worktree of this.worktrees) {
       try {

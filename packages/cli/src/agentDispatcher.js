@@ -271,7 +271,7 @@ REMINDER: You MUST follow the LOG BLOCK format for every action. Each block must
       // Execute Claude CLI in headless mode
       const command = `cd "${workingDirectory}" && claude --print --model claude-opus-4-1-20250805 < "${tempFile}"`;
       
-      console.log(`\n🤖 Dispatching to Claude...`);
+      console.log('\n🤖 Dispatching to Claude...');
       const { stdout, stderr } = await execAsync(command, {
         maxBuffer: 10 * 1024 * 1024, // 10MB buffer for large responses
         timeout: 900000 // 15 minute timeout
