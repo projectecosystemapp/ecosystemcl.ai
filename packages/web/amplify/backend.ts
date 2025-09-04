@@ -1,11 +1,13 @@
 import { defineBackend } from '@aws-amplify/backend';
 import { auth } from './auth/resource';
+import { data } from './data/resource';
 
 /**
- * Minimal ECOSYSTEMCL.AI Backend - Just Auth for Now
+ * ECOSYSTEMCL.AI Backend with Auth and Data
  */
 const backend = defineBackend({
   auth,
+  data,
 });
 
 // Export the API endpoint for CLI configuration
