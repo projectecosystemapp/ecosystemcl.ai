@@ -17,7 +17,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.15.1",
   "devDependencies": {
-    "esbuild": "^0.21.5",
+    "esbuild": "^0.25.0",
     "husky": "^8.0.3"
   },
   "dependencies": {
