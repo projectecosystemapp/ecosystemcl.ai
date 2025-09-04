@@ -1,0 +1,39 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - npm install -g pnpm@8
+      - pnpm install --frozen-lockfile
+      
+  pre_build:
+    commands:
+      - echo "Running quality gates..."
+      - pnpm lint
+      - pnpm type-check
+      - pnpm test
+      
+  build:
+    commands:
+      - echo "Building packages..."
+      - pnpm build
+      - echo "Synthesizing CDK..."
+      - pnpm -F infra synth
+      
+  post_build:
+    commands:
+      - echo "Build completed successfully"
+      
+artifacts:
+  files:
+    - packages/*/dist/**/*
+    - packages/infra/cdk.out/**/*
+    - packages/web/.next/**/*
+    
+cache:
+  paths:
+    - node_modules/**/*
+    - .pnpm-store/**/*
+    - packages/*/node_modules/**/*

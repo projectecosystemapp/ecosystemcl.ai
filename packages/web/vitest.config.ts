@@ -1,11 +1,14 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+// @ts-ignore - use CommonJS require for shared script
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const thresholds = require('../../scripts/coverage-threshold.js');
 
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: 'jsdom',
+    environment: 'happy-dom',
     globals: true,
     setupFiles: './src/tests/setup.ts',
     coverage: {
@@ -17,7 +20,9 @@ export default defineConfig({
         'coverage/',
         '*.config.ts',
         '*.config.js',
+        'src/tests/'
       ],
+      thresholds
     },
   },
   resolve: {

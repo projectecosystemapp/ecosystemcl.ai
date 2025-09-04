@@ -57,6 +57,18 @@ This is for local development and auditing, orchestrated by the `packages/cli` t
 - **Agent Planning**: Before execution, a plan is generated and evaluated by a `PlannerAgent` and `CriticAgent` (`packages/web/src/lib/mcp-server.ts`). This deliberation phase is a core concept.
 - **Local Parallel Execution**: When modifying the CLI, respect the `git worktree` pattern in `pipeline.js` for running agents in parallel. This prevents race conditions when modifying local files.
 
+## 5. Operational Recovery (OpenSearch + CDC)
+
+For urgent recovery in dev/prod:
+- Run `scripts/emergency-recovery.sh` to (a) create/update the OpenSearch index using `scripts/opensearch/index-mapping.json`, (b) start DLQ → source re-drive, and (c) canary-invoke the CDC Lambda.
+- Validate with `scripts/validate-recovery.sh` (checks index reachability, DLQ empty, and CDC logs clean).
+- See `docs/operations/emergency-recovery.md` for env vars and troubleshooting.
+
+## 6. Roadmap: Community Agent Marketplace (Phased)
+
+- Phase 1 (Backend foundation): Add `CommunityAgentsTable` (DynamoDB) and `AgentConfigsBucket` (S3) in `amplify/backend.ts`.
+- Phase 2 (Publishing flow): Implement `ecosystemcli agent publish` (packages/cli) and `/marketplace/publish` + `PublishAgentLambda` (packages/worker).
+- Phase 3 (Consumption flow): Extend `MCPServer` to use community agents, add Marketplace UI (packages/web), and `ecosystemcli config pull` to sync into `.eco_workspace/community/`.
 ## 5. The Community Agent Marketplace (Vision)
 
 The next major evolution is to build a "GitHub for AI Agents." This will transform the platform into a self-expanding ecosystem.

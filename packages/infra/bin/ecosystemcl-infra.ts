@@ -6,6 +6,7 @@ import { ComputeStack } from '../lib/compute-stack';
 import { ApiStack } from '../lib/api-stack';
 import { StorageStack } from '../lib/storage-stack';
 import { OpenSearchStack } from '../lib/opensearch-stack';
+import { CanaryStack } from '../lib/canary-stack';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 
@@ -81,6 +82,13 @@ const apiStack = new ApiStack(app, 'EcosystemCL-ApiStack', {
   workspaceTableName: 'WorkspaceStates',
   taskQueue: computeStack.taskQueue,
   userPoolId: 'us-west-2_F5eg8nTgU',
+});
+
+// Canary Stack - Full system test deployment
+const canaryStack = new CanaryStack(app, 'EcosystemCL-CanaryStack', {
+  ...stackProps,
+  stackName: 'EcosystemCL-Canary',
+  description: 'Project Canary full system diagnostic test',
 });
 
 // Add stack dependencies

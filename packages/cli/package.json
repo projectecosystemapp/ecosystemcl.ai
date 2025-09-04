@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "jest",
+    "test:coverage": "jest --coverage",
     "lint": "eslint src/**/*.js",
     "install-global": "npm link",
     "uninstall-global": "npm unlink"

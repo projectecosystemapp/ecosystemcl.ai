@@ -728,7 +728,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-deploy-role-219895243073-us-west-2",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-cfn-exec-role-219895243073-us-west-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-219895243073-us-west-2/cf264259b8cc77167b19e1c40ab0ae629f5bb805f0275cedd9c62cc4f0489361.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-219895243073-us-west-2/a5ca2fbd3e623e00fb93e8147acde5b708d7636806724b171501851b31666342.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -779,7 +779,7 @@
         "/EcosystemCL-ApiStack/EcosystemAPI/Deployment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "EcosystemAPIDeploymentF641CB1Feca016260eefce2f5afe0f4b39f28583"
+            "data": "EcosystemAPIDeploymentF641CB1F364b49423e833ef7c09606d2e1a54349"
           }
         ],
         "/EcosystemCL-ApiStack/EcosystemAPI/DeploymentStage.v1/Resource": [
@@ -988,6 +988,180 @@
         ]
       },
       "displayName": "EcosystemCL-ApiStack"
+    },
+    "EcosystemCL-CanaryStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "EcosystemCL-CanaryStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "EcosystemCL-CanaryStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://219895243073/us-west-2",
+      "properties": {
+        "templateFile": "EcosystemCL-CanaryStack.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Architecture": "Serverless",
+          "Environment": "production",
+          "ManagedBy": "AWS-CDK",
+          "Project": "ECOSYSTEMCL.AI"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-deploy-role-219895243073-us-west-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-cfn-exec-role-219895243073-us-west-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-219895243073-us-west-2/dacfbb01e1819f6c57d99abcdf2b66639ce5033aeab4ca3ca1c47ad731827266.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "EcosystemCL-CanaryStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-lookup-role-219895243073-us-west-2",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        },
+        "stackName": "EcosystemCL-Canary"
+      },
+      "dependencies": [
+        "EcosystemCL-CanaryStack.assets"
+      ],
+      "metadata": {
+        "/EcosystemCL-CanaryStack": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Architecture",
+                "Value": "Serverless"
+              },
+              {
+                "Key": "Environment",
+                "Value": "production"
+              },
+              {
+                "Key": "ManagedBy",
+                "Value": "AWS-CDK"
+              },
+              {
+                "Key": "Project",
+                "Value": "ECOSYSTEMCL.AI"
+              }
+            ]
+          }
+        ],
+        "/EcosystemCL-CanaryStack/CanaryFunction/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CanaryFunctionServiceRoleDD092454"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/CanaryFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CanaryFunctionD1692701"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/CanaryApi/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CanaryApiF9DAABDB"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/CanaryApi/Deployment/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CanaryApiDeployment1FB97104dd90800172ccbd72bf755fc2dc557164"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/CanaryApi/DeploymentStage.prod/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CanaryApiDeploymentStageprod11064491"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/CanaryApi/Endpoint": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CanaryApiEndpointB1586C11"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/CanaryApi/Default/GET/ApiPermission.EcosystemCLCanaryStackCanaryApiC87912FC.GET..": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CanaryApiGETApiPermissionEcosystemCLCanaryStackCanaryApiC87912FCGETCB67F822"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/CanaryApi/Default/GET/ApiPermission.Test.EcosystemCLCanaryStackCanaryApiC87912FC.GET..": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CanaryApiGETApiPermissionTestEcosystemCLCanaryStackCanaryApiC87912FCGET59C66745"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/CanaryApi/Default/GET/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CanaryApiGETC644789E"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/CanaryCertificate/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CanaryCertificateB140F7A3"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/CanaryDomain/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CanaryDomainC9262974"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/CanaryDomain/Map:--=>EcosystemCLCanaryStackCanaryApiC87912FC/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CanaryDomainMapEcosystemCLCanaryStackCanaryApiC87912FCC7C177E5"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/CanaryARecord/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CanaryARecord82A73D97"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/CanaryEndpoint": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CanaryEndpoint"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/ApiGatewayEndpoint": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiGatewayEndpoint"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/EcosystemCL-CanaryStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "EcosystemCL-CanaryStack"
     },
     "Tree": {
       "type": "cdk:tree",

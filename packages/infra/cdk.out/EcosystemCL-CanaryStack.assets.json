@@ -1,0 +1,21 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "dacfbb01e1819f6c57d99abcdf2b66639ce5033aeab4ca3ca1c47ad731827266": {
+      "displayName": "EcosystemCL-Canary Template",
+      "source": {
+        "path": "EcosystemCL-CanaryStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "219895243073-us-west-2-d3677235": {
+          "bucketName": "cdk-hnb659fds-assets-219895243073-us-west-2",
+          "objectKey": "dacfbb01e1819f6c57d99abcdf2b66639ce5033aeab4ca3ca1c47ad731827266.json",
+          "region": "us-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-file-publishing-role-219895243073-us-west-2"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

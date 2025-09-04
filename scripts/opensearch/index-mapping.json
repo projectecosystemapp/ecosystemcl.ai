@@ -1,0 +1,31 @@
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1
+    }
+  },
+  "mappings": {
+    "dynamic": "false",
+    "properties": {
+      "id": { "type": "keyword" },
+      "repo": { "type": "keyword" },
+      "path": { "type": "keyword" },
+      "keyword": { "type": "keyword" },
+      "ts": { "type": "date" },
+      "content": { "type": "text" },
+      "summary": { "type": "text" },
+      "tags": { "type": "keyword" },
+      "embedding": {
+        "type": "knn_vector",
+        "dimension": 1536,
+        "method": {
+          "name": "hnsw",
+          "engine": "faiss",
+          "space_type": "l2",
+          "parameters": { "m": 16, "ef_construction": 256 }
+        }
+      }
+    }
+  }
+}

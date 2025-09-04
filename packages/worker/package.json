@@ -11,7 +11,9 @@
     "test:unit": "vitest run --dir src/tests",
     "test:e2e": "vitest run src/tests/aws-native-e2e.test.ts",
     "test:coverage": "vitest run --coverage",
-    "test:tc": "jest src/tests/testcontainers-example.test.ts"
+    "test:tc": "jest src/tests/testcontainers-example.test.ts",
+    "type-check": "tsc --noEmit",
+    "lint": "echo 'Linting not configured for worker package'"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.600.0",

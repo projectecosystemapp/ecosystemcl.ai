@@ -1,0 +1,375 @@
+{
+ "Description": "Project Canary full system diagnostic test",
+ "Resources": {
+  "CanaryFunctionServiceRoleDD092454": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-CanaryStack/CanaryFunction/ServiceRole/Resource"
+   }
+  },
+  "CanaryFunctionD1692701": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "ZipFile": "\n        exports.handler = async (event) => {\n          return {\n            statusCode: 200,\n            headers: {\n              'Content-Type': 'application/json',\n              'Access-Control-Allow-Origin': '*'\n            },\n            body: JSON.stringify({\n              message: 'ECOSYSTEM.AI Canary is alive',\n              timestamp: new Date().toISOString()\n            })\n          };\n        };\n      "
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CanaryFunctionServiceRoleDD092454",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x"
+   },
+   "DependsOn": [
+    "CanaryFunctionServiceRoleDD092454"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-CanaryStack/CanaryFunction/Resource"
+   }
+  },
+  "CanaryApiF9DAABDB": {
+   "Type": "AWS::ApiGateway::RestApi",
+   "Properties": {
+    "Description": "Project Canary full system test endpoint",
+    "Name": "Canary Test API"
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-CanaryStack/CanaryApi/Resource"
+   }
+  },
+  "CanaryApiDeployment1FB97104dd90800172ccbd72bf755fc2dc557164": {
+   "Type": "AWS::ApiGateway::Deployment",
+   "Properties": {
+    "Description": "Project Canary full system test endpoint",
+    "RestApiId": {
+     "Ref": "CanaryApiF9DAABDB"
+    }
+   },
+   "DependsOn": [
+    "CanaryApiGETC644789E"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-CanaryStack/CanaryApi/Deployment/Resource",
+    "aws:cdk:do-not-refactor": true
+   }
+  },
+  "CanaryApiDeploymentStageprod11064491": {
+   "Type": "AWS::ApiGateway::Stage",
+   "Properties": {
+    "DeploymentId": {
+     "Ref": "CanaryApiDeployment1FB97104dd90800172ccbd72bf755fc2dc557164"
+    },
+    "RestApiId": {
+     "Ref": "CanaryApiF9DAABDB"
+    },
+    "StageName": "prod"
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-CanaryStack/CanaryApi/DeploymentStage.prod/Resource"
+   }
+  },
+  "CanaryApiGETApiPermissionEcosystemCLCanaryStackCanaryApiC87912FCGETCB67F822": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "CanaryFunctionD1692701",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-west-2:219895243073:",
+       {
+        "Ref": "CanaryApiF9DAABDB"
+       },
+       "/",
+       {
+        "Ref": "CanaryApiDeploymentStageprod11064491"
+       },
+       "/GET/"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-CanaryStack/CanaryApi/Default/GET/ApiPermission.EcosystemCLCanaryStackCanaryApiC87912FC.GET.."
+   }
+  },
+  "CanaryApiGETApiPermissionTestEcosystemCLCanaryStackCanaryApiC87912FCGET59C66745": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "CanaryFunctionD1692701",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-west-2:219895243073:",
+       {
+        "Ref": "CanaryApiF9DAABDB"
+       },
+       "/test-invoke-stage/GET/"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-CanaryStack/CanaryApi/Default/GET/ApiPermission.Test.EcosystemCLCanaryStackCanaryApiC87912FC.GET.."
+   }
+  },
+  "CanaryApiGETC644789E": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-west-2:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "CanaryFunctionD1692701",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Fn::GetAtt": [
+      "CanaryApiF9DAABDB",
+      "RootResourceId"
+     ]
+    },
+    "RestApiId": {
+     "Ref": "CanaryApiF9DAABDB"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-CanaryStack/CanaryApi/Default/GET/Resource"
+   }
+  },
+  "CanaryCertificateB140F7A3": {
+   "Type": "AWS::CertificateManager::Certificate",
+   "Properties": {
+    "DomainName": "canary.ecosystem-app.com",
+    "DomainValidationOptions": [
+     {
+      "DomainName": "canary.ecosystem-app.com",
+      "HostedZoneId": "Z05786381GFBZ9W38SJDR"
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcosystemCL-CanaryStack/CanaryCertificate"
+     }
+    ],
+    "ValidationMethod": "DNS"
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-CanaryStack/CanaryCertificate/Resource"
+   }
+  },
+  "CanaryDomainC9262974": {
+   "Type": "AWS::ApiGateway::DomainName",
+   "Properties": {
+    "DomainName": "canary.ecosystem-app.com",
+    "EndpointConfiguration": {
+     "Types": [
+      "REGIONAL"
+     ]
+    },
+    "RegionalCertificateArn": {
+     "Ref": "CanaryCertificateB140F7A3"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-CanaryStack/CanaryDomain/Resource"
+   }
+  },
+  "CanaryDomainMapEcosystemCLCanaryStackCanaryApiC87912FCC7C177E5": {
+   "Type": "AWS::ApiGateway::BasePathMapping",
+   "Properties": {
+    "DomainName": {
+     "Ref": "CanaryDomainC9262974"
+    },
+    "RestApiId": {
+     "Ref": "CanaryApiF9DAABDB"
+    },
+    "Stage": {
+     "Ref": "CanaryApiDeploymentStageprod11064491"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-CanaryStack/CanaryDomain/Map:--=>EcosystemCLCanaryStackCanaryApiC87912FC/Resource"
+   }
+  },
+  "CanaryARecord82A73D97": {
+   "Type": "AWS::Route53::RecordSet",
+   "Properties": {
+    "AliasTarget": {
+     "DNSName": {
+      "Fn::GetAtt": [
+       "CanaryDomainC9262974",
+       "RegionalDomainName"
+      ]
+     },
+     "HostedZoneId": {
+      "Fn::GetAtt": [
+       "CanaryDomainC9262974",
+       "RegionalHostedZoneId"
+      ]
+     }
+    },
+    "HostedZoneId": "Z05786381GFBZ9W38SJDR",
+    "Name": "canary.ecosystem-app.com.",
+    "Type": "A"
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-CanaryStack/CanaryARecord/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/12P3W7CMAyFn4X7kEG3SbtlIO7YUPsAk0lNMTQ/SpxVKMq7T2nRVu3K3znHtuxKVusXuVrAEJaqvS17OsnUMKibgCF8pR70qQWZ9tEoJmvE9mzmfESvKQSyJgsCLVNteyxBqVmAow4YB7jLVGPgjaMxfOAOXW/vGg0Xd6Yahm5cM0GNwUav8B0CigPyxbYlfNDOaiDzAXqcmKnSfgS+HMA5Ml1J/1lZKPRMZ1LAqMFAh16m7Z9XZmYyC28j4+uzTJsalfXt9E6hBjnn31OL/xnZRc7C2BblNTx9V5Vcv8nV4hqIlj4aJo2ynuoPsOUukIoBAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-CanaryStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "CanaryApiEndpointB1586C11": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "CanaryApiF9DAABDB"
+      },
+      ".execute-api.us-west-2.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "CanaryApiDeploymentStageprod11064491"
+      },
+      "/"
+     ]
+    ]
+   }
+  },
+  "CanaryEndpoint": {
+   "Description": "Canary test endpoint URL",
+   "Value": "https://canary.ecosystem-app.com"
+  },
+  "ApiGatewayEndpoint": {
+   "Description": "Direct API Gateway endpoint",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "CanaryApiF9DAABDB"
+      },
+      ".execute-api.us-west-2.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "CanaryApiDeploymentStageprod11064491"
+      },
+      "/"
+     ]
+    ]
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

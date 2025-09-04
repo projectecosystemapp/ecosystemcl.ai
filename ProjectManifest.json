@@ -1,0 +1,57 @@
+{
+  "projectName": "ECOSYSTEMCL.AI",
+  "version": "1.0.0",
+  "architecture": "AWS-Native Serverless",
+  "monorepoStructure": {
+    "packageManager": "pnpm@10.15.1",
+    "workspaces": [
+      {
+        "name": "@ecosystemcl/cli",
+        "path": "packages/cli",
+        "type": "Node.js CLI Application",
+        "description": "Command-line interface for agent orchestration"
+      },
+      {
+        "name": "@ecosystemcl/infra",
+        "path": "packages/infra",
+        "type": "AWS CDK Infrastructure",
+        "description": "Infrastructure as Code using AWS CDK v2.160.0"
+      },
+      {
+        "name": "@ecosystemcl/web",
+        "path": "packages/web",
+        "type": "Next.js Web Application",
+        "description": "Frontend dashboard and management interface"
+      },
+      {
+        "name": "@ecosystemcl/worker",
+        "path": "packages/worker",
+        "type": "Lambda Functions",
+        "description": "Core worker functions for agent execution"
+      }
+    ]
+  },
+  "primaryTechnologies": {
+    "infrastructure": ["AWS CDK", "TypeScript"],
+    "compute": ["AWS Lambda", "ECS Fargate", "Step Functions"],
+    "storage": ["DynamoDB", "S3", "OpenSearch Serverless"],
+    "api": ["API Gateway", "Lambda Proxy Integration"],
+    "authentication": ["AWS Cognito"],
+    "ai": ["Amazon Bedrock", "Titan Embeddings"]
+  },
+  "deployedStacks": [
+    "EcosystemCL-StorageStack",
+    "EcosystemCL-OpenSearchStack",
+    "EcosystemCL-ComputeStack",
+    "EcosystemCL-ApiStack"
+  ],
+  "keyDomains": {
+    "authentication": "packages/web/lib/amplify-server-utils.ts",
+    "orchestration": "packages/worker/src/tools/planning.ts",
+    "vectorSearch": "packages/worker/src/services/VectorStoreService.ts",
+    "helixLookup": "packages/worker/src/tools/helix_lookup.ts",
+    "cdcProcessor": "packages/worker/src/lambdas/cdcProcessor.ts"
+  },
+  "analysisTimestamp": "2025-01-03T00:00:00Z",
+  "analysisAgent": "SourceCodeAnalyzer"
+}

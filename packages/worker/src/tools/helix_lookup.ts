@@ -252,35 +252,38 @@ function generateCacheKey(request: HelixLookupRequest): string {
 }
 
 /**
- * Batch get patterns from DynamoDB
+ * Batch get patterns from DynamoDB using PatternIdIndex GSI
  */
 async function batchGetPatterns(patternIds: string[]): Promise<Map<string, HelixPattern>> {
   const patterns = new Map<string, HelixPattern>();
   
-  // DynamoDB BatchGetItem has a limit of 100 items
-  const chunks = [];
-  for (let i = 0; i < patternIds.length; i += 100) {
-    chunks.push(patternIds.slice(i, i + 100));
-  }
-  
-  for (const chunk of chunks) {
-    const promises = chunk.map(async (patternId) => {
-      const command = new GetCommand({
-        TableName: config.tableName,
-        Key: { patternId },
-      });
-      
-      try {
-        const response = await docClient.send(command);
-        if (response.Item) {
-          patterns.set(patternId, response.Item as HelixPattern);
-        }
-      } catch (error) {
-        console.error(`Failed to get pattern ${patternId}:`, error);
-      }
+  // Query each pattern ID using the GSI
+  const promises = patternIds.map(async (patternId) => {
+    const command = new QueryCommand({
+      TableName: config.tableName,
+      IndexName: 'PatternIdIndex',
+      KeyConditionExpression: 'patternId = :pid',
+      ExpressionAttributeValues: {
+        ':pid': patternId,
+      },
+      Limit: 1, // We only need the canonical entry
     });
     
-    await Promise.all(promises);
+    try {
+      const response = await docClient.send(command);
+      if (response.Items && response.Items.length > 0) {
+        // Take the first item (canonical entry)
+        patterns.set(patternId, response.Items[0] as HelixPattern);
+      }
+    } catch (error) {
+      console.error(`Failed to get pattern ${patternId}:`, error);
+    }
+  });
+  
+  // Process in batches of 25 for reasonable parallelism
+  const batchSize = 25;
+  for (let i = 0; i < promises.length; i += batchSize) {
+    await Promise.all(promises.slice(i, i + batchSize));
   }
   
   return patterns;
@@ -296,6 +299,10 @@ async function searchDynamoDB(request: HelixLookupRequest): Promise<HelixPattern
   const keywords = request.intent.toLowerCase().split(/\s+/);
   
   for (const keyword of keywords) {
+    // Sanitize keyword to prevent NoSQL injection
+    const sanitizedKeyword = keyword.replace(/[^\w\-]/g, '').slice(0, 100);
+    if (!sanitizedKeyword) continue;
+    
     const command = new QueryCommand({
       TableName: config.tableName,
       IndexName: 'KeywordIndex',
@@ -304,7 +311,7 @@ async function searchDynamoDB(request: HelixLookupRequest): Promise<HelixPattern
         ? 'projectId = :projectId' 
         : undefined,
       ExpressionAttributeValues: {
-        ':keyword': keyword,
+        ':keyword': sanitizedKeyword,
         ...(request.projectId && { ':projectId': request.projectId }),
       },
       Limit: request.maxResults || config.maxResults,
@@ -318,7 +325,9 @@ async function searchDynamoDB(request: HelixLookupRequest): Promise<HelixPattern
         }
       }
     } catch (error) {
-      console.error(`Failed to query keyword ${keyword}:`, error);
+      // Sanitize keyword for logging to prevent log injection
+      const safeKeyword = sanitizedKeyword.replace(/[\r\n]/g, '');
+      console.error(`Failed to query keyword ${safeKeyword}:`, error);
     }
   }
   

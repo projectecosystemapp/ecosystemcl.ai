@@ -211,3 +211,14 @@ MIT License - see [LICENSE](LICENSE) for details.
 **Built with ❤️ by the ECOSYSTEMCL.AI team**
 
 [Website](https://ecosystemcl.ai) • [Documentation](https://docs.ecosystemcl.ai) • [Discord](https://discord.gg/ecosystemcl-ai) • [Twitter](https://twitter.com/ecosystemcl_ai)
+
+## 🛠️ Operations: Emergency Recovery
+
+If OpenSearch indexing or the CDC pipeline is degraded, run:
+
+```bash
+./scripts/emergency-recovery.sh
+./scripts/validate-recovery.sh
+```
+
+See `docs/operations/emergency-recovery.md` for details.

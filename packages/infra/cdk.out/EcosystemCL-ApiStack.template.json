@@ -16,7 +16,7 @@
     "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Resource"
    }
   },
-  "EcosystemAPIDeploymentF641CB1Feca016260eefce2f5afe0f4b39f28583": {
+  "EcosystemAPIDeploymentF641CB1F364b49423e833ef7c09606d2e1a54349": {
    "Type": "AWS::ApiGateway::Deployment",
    "Properties": {
     "Description": "ECOSYSTEMCL.AI Platform API",
@@ -51,7 +51,7 @@
    "Type": "AWS::ApiGateway::Stage",
    "Properties": {
     "DeploymentId": {
-     "Ref": "EcosystemAPIDeploymentF641CB1Feca016260eefce2f5afe0f4b39f28583"
+     "Ref": "EcosystemAPIDeploymentF641CB1F364b49423e833ef7c09606d2e1a54349"
     },
     "MethodSettings": [
      {
@@ -624,7 +624,7 @@
      "IntegrationResponses": [
       {
        "ResponseTemplates": {
-        "application/json": "{\"status\":\"healthy\",\"service\":\"ECOSYSTEMCL.AI\",\"timestamp\":\"2025-09-04T02:30:00.953Z\"}"
+        "application/json": "{\"status\":\"healthy\",\"service\":\"ECOSYSTEMCL.AI\",\"timestamp\":\"2025-09-04T05:22:46.387Z\"}"
        },
        "StatusCode": "200"
       }
@@ -755,7 +755,7 @@
     ],
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-219895243073-us-west-2",
-     "S3Key": "a9da97337abcf344984a317be4f62b9d1196b6a5f15e69eb66caecf40f9cc5b8.zip"
+     "S3Key": "e0d66691478cbb9a26967cb45783bb5ff0c376af0aeaa879aa9e0d84fec5f607.zip"
     },
     "Environment": {
      "Variables": {
@@ -786,7 +786,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "EcosystemCL-ApiStack/HelixLookupFunction/Resource",
-    "aws:asset:path": "asset.a9da97337abcf344984a317be4f62b9d1196b6a5f15e69eb66caecf40f9cc5b8",
+    "aws:asset:path": "asset.e0d66691478cbb9a26967cb45783bb5ff0c376af0aeaa879aa9e0d84fec5f607",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Code"
    }

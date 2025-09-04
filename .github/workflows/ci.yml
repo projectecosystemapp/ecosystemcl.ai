@@ -1,0 +1,67 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+
+jobs:
+  quality-gates:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: [web, worker, infra, cli]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          
+      - run: pnpm install --frozen-lockfile
+      
+      - name: Lint
+        run: pnpm -F ${{ matrix.package }} lint
+        continue-on-error: ${{ matrix.package == 'cli' }}
+        
+      - name: Type Check
+        run: pnpm -F ${{ matrix.package }} type-check
+        if: matrix.package != 'cli'
+        
+      - name: Test
+        run: pnpm -F ${{ matrix.package }} test
+        
+      - name: Coverage
+        run: pnpm -F ${{ matrix.package }} test:coverage
+        if: matrix.package == 'web'
+        
+      - uses: codecov/codecov-action@v3
+        if: matrix.package == 'web'
+        with:
+          files: ./packages/web/coverage/lcov.info
+          flags: web
+
+  cdk-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      
+      - run: pnpm install --frozen-lockfile
+      
+      - name: CDK Synth
+        run: pnpm -F infra synth
+        env:
+          CDK_DEFAULT_ACCOUNT: '123456789012'
+          CDK_DEFAULT_REGION: 'us-west-2'
