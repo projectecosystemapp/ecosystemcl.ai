@@ -24,6 +24,6 @@ applications:
       phases:
         build:
           commands:
-            - cd packages/web/amplify
-            - npm ci
-            - npm run build
+            - cd amplify
+            - npm ci --legacy-peer-deps
+            - npx ampx generate
