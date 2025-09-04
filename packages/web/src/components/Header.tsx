@@ -1,9 +1,24 @@
+'use client';
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Terminal, Download, Users, CreditCard, Menu } from "lucide-react";
+import { Terminal, Download, Users, CreditCard, Menu, LogOut } from "lucide-react";
+import { useAuthenticator } from '@aws-amplify/ui-react';
+import { useEffect, useState } from 'react';
 
 export default function Header() {
+  const { user, signOut } = useAuthenticator((context) => [context.user]);
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
+  if (!isClient) {
+    return null;
+  }
+  
   return (
     <header className="border-b border-slate-800 bg-slate-900/95 backdrop-blur supports-[backdrop-filter]:bg-slate-900/60">
       <div className="container mx-auto px-4">
@@ -40,11 +55,25 @@ export default function Header() {
               </Link>
             </Button>
             
-            <Button size="sm" asChild>
-              <Link href="/dashboard">
-                Launch App
-              </Link>
-            </Button>
+            {user ? (
+              <>
+                <Button size="sm" asChild>
+                  <Link href="/dashboard">
+                    Dashboard
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" onClick={signOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Button size="sm" asChild>
+                <Link href="/auth">
+                  Sign In
+                </Link>
+              </Button>
+            )}
 
             <Button variant="ghost" size="sm" className="md:hidden">
               <Menu className="h-5 w-5" />

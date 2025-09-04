@@ -1,5 +1,8 @@
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUser } from 'aws-amplify/auth/server';
 import { redirect } from "next/navigation";
+import { cookies } from 'next/headers';
+import { runWithAmplifyServerContext } from 'aws-amplify/adapter-nextjs';
+import outputs from '../../../amplify_outputs.json';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,10 +20,13 @@ import {
 } from "lucide-react";
 
 export default async function DashboardPage() {
-  const { userId } = await auth();
+  const user = await runWithAmplifyServerContext({
+    nextServerContext: { cookies },
+    operation: (contextSpec) => getCurrentUser(contextSpec)
+  }).catch(() => null);
   
-  if (!userId) {
-    redirect("/sign-in");
+  if (!user) {
+    redirect("/auth");
   }
 
   // Mock data - replace with real data from your API

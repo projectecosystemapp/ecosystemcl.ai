@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
+import { Amplify } from 'aws-amplify';
+import { Authenticator } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
+import outputs from '../../amplify_outputs.json';
 import Header from "@/components/Header";
+
+Amplify.configure(outputs);
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,13 +35,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en" className="dark">
-        <body className={`${inter.className} bg-slate-900 text-white`}>
+    <html lang="en" className="dark">
+      <body className={`${inter.className} bg-slate-900 text-white`}>
+        <Authenticator.Provider>
           <Header />
           <main>{children}</main>
-        </body>
-      </html>
-    </ClerkProvider>
+        </Authenticator.Provider>
+      </body>
+    </html>
   );
 }

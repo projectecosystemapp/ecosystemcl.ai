@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from 'aws-amplify/auth/server';
+import { runWithAmplifyServerContext } from 'aws-amplify/adapter-nextjs';
+import { cookies } from 'next/headers';
 
 const AGENTS = [
   {
@@ -36,11 +38,14 @@ const AGENTS = [
 
 export async function GET() {
   try {
-    const { userId } = await auth();
+    const user = await runWithAmplifyServerContext({
+      nextServerContext: { cookies },
+      operation: (contextSpec) => getCurrentUser(contextSpec)
+    }).catch(() => null);
     
     const availableAgents = AGENTS.map(agent => ({
       ...agent,
-      available: userId ? true : agent.tier === 'starter'
+      available: user ? true : agent.tier === 'starter'
     }));
 
     return NextResponse.json({

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useUser } from '@clerk/nextjs';
+import { useAuthenticator } from '@aws-amplify/ui-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,7 @@ import { Loader2, CheckCircle, XCircle, Terminal } from 'lucide-react';
 export default function DeviceAuthPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { isLoaded, isSignedIn, user } = useUser();
+  const { user } = useAuthenticator((context) => [context.user]);
   
   const [userCode, setUserCode] = useState('');
   const [inputCode, setInputCode] = useState('');
@@ -30,11 +30,11 @@ export default function DeviceAuthPage() {
 
   useEffect(() => {
     // Redirect to sign in if not authenticated
-    if (isLoaded && !isSignedIn) {
+    if (!user) {
       const returnUrl = `/device-auth${window.location.search}`;
-      router.push(`/sign-in?redirect_url=${encodeURIComponent(returnUrl)}`);
+      router.push(`/auth?redirect_url=${encodeURIComponent(returnUrl)}`);
     }
-  }, [isLoaded, isSignedIn, router]);
+  }, [user, router]);
 
   const handleAuthorize = async () => {
     if (!inputCode || inputCode.length !== 9) { // Format: XXXX-XXXX
@@ -74,7 +74,7 @@ export default function DeviceAuthPage() {
     }
   };
 
-  if (!isLoaded || !isSignedIn) {
+  if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -133,7 +133,7 @@ export default function DeviceAuthPage() {
               </Button>
 
               <div className="text-center text-sm text-muted-foreground">
-                Signed in as <span className="font-medium">{user.primaryEmailAddress?.emailAddress}</span>
+                Signed in as <span className="font-medium">{user.signInDetails?.loginId}</span>
               </div>
             </>
           )}

@@ -1,27 +1,45 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextRequest, NextResponse } from 'next/server';
+import { runWithAmplifyServerContext } from 'aws-amplify/adapter-nextjs';
+import { getCurrentUser } from 'aws-amplify/auth/server';
+import outputs from '../amplify_outputs.json';
 
-const isProtectedRoute = createRouteMatcher([
-  "/dashboard(.*)",
-  "/agents(.*)",
-  "/download(.*)",
-]);
+const protectedRoutes = [
+  '/dashboard',
+  '/agents',
+  '/download'
+];
 
-const isPublicApiRoute = createRouteMatcher([
-  "/api/device-auth/(.*)",
-  "/api/auth/refresh",
-]);
+const publicApiRoutes = [
+  '/api/device-auth',
+  '/api/auth/refresh'
+];
 
-export default clerkMiddleware(async (auth, req) => {
-  // Allow public API routes without authentication
-  if (isPublicApiRoute(req)) {
-    return;
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  
+  // Allow public API routes
+  if (publicApiRoutes.some(route => pathname.startsWith(route))) {
+    return NextResponse.next();
   }
   
-  // Protect specific routes
-  if (isProtectedRoute(req)) {
-    await auth.protect();
+  // Check auth for protected routes
+  if (protectedRoutes.some(route => pathname.startsWith(route))) {
+    try {
+      const user = await runWithAmplifyServerContext({
+        nextServerContext: { cookies: request.cookies },
+        operation: (contextSpec) => getCurrentUser(contextSpec)
+      });
+      
+      if (!user) {
+        return NextResponse.redirect(new URL('/auth', request.url));
+      }
+    } catch {
+      return NextResponse.redirect(new URL('/auth', request.url));
+    }
   }
-});
+  
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [
