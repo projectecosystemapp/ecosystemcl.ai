@@ -19,8 +19,6 @@ phases:
     commands:
       - echo "Building packages..."
       - pnpm build
-      - echo "Synthesizing CDK..."
-      - pnpm -F infra synth
 
   post_build:
     commands:
@@ -29,7 +27,6 @@ phases:
 artifacts:
   files:
     - packages/*/dist/**/*
-    - packages/infra/cdk.out/**/*
     - packages/web/.next/**/*
 
 cache:
