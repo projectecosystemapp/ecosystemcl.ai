@@ -1,0 +1,41 @@
+name: Test CLI Integration
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *' # Every 6 hours
+
+jobs:
+  test-cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      
+      - name: Install CLI
+        run: |
+          cd packages/cli
+          pnpm install
+          npm link
+      
+      - name: Test CLI commands
+        run: |
+          ecosystemcli --version
+          ecosystemcli --help
+          ecosystemcli agents
+      
+      - name: Test API connectivity
+        run: |
+          curl -f https://ecosystem-app.com || echo "API not ready yet"
+          
+      - name: Create test report
+        run: |
+          echo "## CLI Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "- CLI Version: $(ecosystemcli --version)" >> $GITHUB_STEP_SUMMARY
+          echo "- API Status: $(curl -s -o /dev/null -w '%{http_code}' https://ecosystem-app.com)" >> $GITHUB_STEP_SUMMARY
