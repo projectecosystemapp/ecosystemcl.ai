@@ -1,25 +1,21 @@
 import * as cdk from 'aws-cdk-lib';
-import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import * as cognito from 'aws-cdk-lib/aws-cognito';
-import * as elasticache from 'aws-cdk-lib/aws-elasticache';
-import * as opensearch from 'aws-cdk-lib/aws-opensearchservice';
 import { Construct } from 'constructs';
 /**
  * Database Stack for ECOSYSTEMCL.AI
  *
- * Implements the primary data layer using AWS-native serverless services:
- * - DynamoDB for structured data (patterns, workspace states, subscriptions)
- * - ElastiCache Redis for high-speed caching and rate limiting
- * - OpenSearch for semantic vector search and embeddings
- * - Cognito for identity management
+ * Hybrid deployment strategy:
+ * - IMPORTS existing DynamoDB tables and Cognito User Pool
+ * - CREATES new ElastiCache and OpenSearch infrastructure
+ *
+ * This approach preserves production data while transitioning to CDK management
  */
 export declare class DatabaseStack extends cdk.Stack {
-    readonly helixPatternTable: dynamodb.Table;
-    readonly workspaceStateTable: dynamodb.Table;
-    readonly agentProfileTable: dynamodb.Table;
-    readonly subscriptionTable: dynamodb.Table;
-    readonly userPool: cognito.UserPool;
-    readonly redisCluster: elasticache.CfnCacheCluster;
-    readonly openSearchDomain: opensearch.Domain;
+    readonly helixPatternTableName: string;
+    readonly workspaceStateTableName: string;
+    readonly agentProfileTableName: string;
+    readonly subscriptionTableName: string;
+    readonly userPoolId: string;
+    readonly redisClusterEndpoint: string;
+    readonly openSearchEndpoint: string;
     constructor(scope: Construct, id: string, props?: cdk.StackProps);
 }

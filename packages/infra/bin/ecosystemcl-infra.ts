@@ -5,6 +5,7 @@ import { DatabaseStack } from '../lib/database-stack';
 import { ComputeStack } from '../lib/compute-stack';
 import { ApiStack } from '../lib/api-stack';
 import { StorageStack } from '../lib/storage-stack';
+import { OpenSearchStack } from '../lib/opensearch-stack';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 
@@ -55,6 +56,13 @@ const storageStack = new StorageStack(app, 'EcosystemCL-StorageStack', {
 //   description: 'Primary data layer - DynamoDB, ElastiCache, OpenSearch/Aurora',
 // });
 
+// OpenSearch Serverless Stack - Vector search for Helix patterns
+const openSearchStack = new OpenSearchStack(app, 'EcosystemCL-OpenSearchStack', {
+  ...stackProps,
+  stackName: 'EcosystemCL-OpenSearch',
+  description: 'OpenSearch Serverless for Helix vector search (2 OCU dev / 4 OCU prod)',
+});
+
 // Compute Stack - ECS Fargate, SQS, Step Functions
 const computeStack = new ComputeStack(app, 'EcosystemCL-ComputeStack', {
   ...stackProps,
@@ -72,9 +80,14 @@ const apiStack = new ApiStack(app, 'EcosystemCL-ApiStack', {
   patternTableName: 'HelixPatternEntries',
   workspaceTableName: 'WorkspaceStates',
   taskQueue: computeStack.taskQueue,
-  userPoolId: process.env.COGNITO_USER_POOL_ID || '',
+  userPoolId: 'us-west-2_F5eg8nTgU',
 });
 
 // Add stack dependencies
 computeStack.addDependency(storageStack);
+computeStack.addDependency(openSearchStack); // CDC Lambda needs OpenSearch endpoint
 apiStack.addDependency(computeStack);
+apiStack.addDependency(openSearchStack); // API Lambdas need OpenSearch endpoint
+
+// Export OpenSearch endpoint for Lambda environment variables
+process.env.OPENSEARCH_ENDPOINT = openSearchStack.collectionEndpoint;

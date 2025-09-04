@@ -692,19 +692,9 @@
        ],
        "Effect": "Allow",
        "Resource": [
+        "arn:aws:dynamodb:us-west-2:219895243073:table/HelixPatternEntries",
         {
-         "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttHelixPatternEntriesD80A9318Arn058D2365"
-        },
-        {
-         "Fn::Join": [
-          "",
-          [
-           {
-            "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttHelixPatternEntriesD80A9318Arn058D2365"
-           },
-           "/index/*"
-          ]
-         ]
+         "Ref": "AWS::NoValue"
         }
        ]
       },
@@ -724,6 +714,14 @@
          "Arn"
         ]
        }
+      },
+      {
+       "Action": [
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:GetSecretValue"
+       ],
+       "Effect": "Allow",
+       "Resource": "arn:aws:secretsmanager:us-west-2:219895243073:secret:prod/tccloudcode-??????"
       },
       {
        "Action": [
@@ -761,9 +759,11 @@
        },
        {
         "Name": "PATTERN_TABLE_NAME",
-        "Value": {
-         "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputRefHelixPatternEntriesD80A9318917C9230"
-        }
+        "Value": "HelixPatternEntries"
+       },
+       {
+        "Name": "TCCLOUD_SECRET_ARN",
+        "Value": "arn:aws:secretsmanager:us-west-2:219895243073:secret:prod/tccloudcode"
        }
       ],
       "Essential": true,
@@ -1165,10 +1165,299 @@
     "aws:cdk:path": "EcosystemCL-ComputeStack/ProjectAtlasStateMachine/Resource"
    }
   },
+  "PatternVersionBucketBC85B1D3": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketName": "ecosystemcl-pattern-versions-219895243073",
+    "LifecycleConfiguration": {
+     "Rules": [
+      {
+       "Id": "DeleteOldVersions",
+       "NoncurrentVersionExpiration": {
+        "NoncurrentDays": 90
+       },
+       "Status": "Enabled"
+      }
+     ]
+    },
+    "VersioningConfiguration": {
+     "Status": "Enabled"
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/PatternVersionBucket/Resource"
+   }
+  },
+  "CDCDeadLetterQueue4D130C83": {
+   "Type": "AWS::SQS::Queue",
+   "Properties": {
+    "KmsMasterKeyId": "alias/aws/sqs",
+    "MessageRetentionPeriod": 1209600,
+    "QueueName": "ecosystemcl-cdc-dlq"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/CDCDeadLetterQueue/Resource"
+   }
+  },
+  "CDCAlarmTopicF09B083C": {
+   "Type": "AWS::SNS::Topic",
+   "Properties": {
+    "TopicName": "ecosystemcl-cdc-alarms"
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/CDCAlarmTopic/Resource"
+   }
+  },
+  "CDCDLQAlarm315E1E17": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmActions": [
+     {
+      "Ref": "CDCAlarmTopicF09B083C"
+     }
+    ],
+    "AlarmDescription": "CDC Dead Letter Queue has messages",
+    "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+    "Dimensions": [
+     {
+      "Name": "QueueName",
+      "Value": {
+       "Fn::GetAtt": [
+        "CDCDeadLetterQueue4D130C83",
+        "QueueName"
+       ]
+      }
+     }
+    ],
+    "EvaluationPeriods": 1,
+    "MetricName": "ApproximateNumberOfMessagesVisible",
+    "Namespace": "AWS/SQS",
+    "Period": 300,
+    "Statistic": "Maximum",
+    "Threshold": 1,
+    "TreatMissingData": "notBreaching"
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/CDCDLQAlarm/Resource"
+   }
+  },
+  "CDCProcessorServiceRoleC69BB556": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/CDCProcessor/ServiceRole/Resource"
+   }
+  },
+  "CDCProcessorServiceRoleDefaultPolicy37C13FDB": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "bedrock:InvokeModel",
+        "cloudwatch:PutMetricData",
+        "dynamodb:ListStreams",
+        "xray:PutTelemetryRecords",
+        "xray:PutTraceSegments"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "dynamodb:DescribeStream",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator"
+       ],
+       "Effect": "Allow",
+       "Resource": "arn:aws:dynamodb:us-west-2:219895243073:table/HelixPatternEntries/stream/2025-09-03T23:00:14.265"
+      },
+      {
+       "Action": [
+        "s3:Abort*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "PatternVersionBucketBC85B1D3",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "PatternVersionBucketBC85B1D3",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl",
+        "sqs:SendMessage"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "CDCDeadLetterQueue4D130C83",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": [
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:GetSecretValue"
+       ],
+       "Effect": "Allow",
+       "Resource": "arn:aws:secretsmanager:us-west-2:219895243073:secret:prod/tccloudcode-??????"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CDCProcessorServiceRoleDefaultPolicy37C13FDB",
+    "Roles": [
+     {
+      "Ref": "CDCProcessorServiceRoleC69BB556"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/CDCProcessor/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CDCProcessor417BF916": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-219895243073-us-west-2",
+     "S3Key": "8cee1febcba75138400921cc978c6dcd6fd3e63cadb9428b2180bc2143db50f4.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "OPENSEARCH_ENDPOINT": "",
+      "DLQ_URL": {
+       "Ref": "CDCDeadLetterQueue4D130C83"
+      },
+      "VERSION_BUCKET": {
+       "Ref": "PatternVersionBucketBC85B1D3"
+      },
+      "TCCLOUD_SECRET_ARN": "arn:aws:secretsmanager:us-west-2:219895243073:secret:prod/tccloudcode",
+      "NODE_OPTIONS": "--enable-source-maps"
+     }
+    },
+    "FunctionName": "ecosystemcl-cdc-processor",
+    "Handler": "index.handler",
+    "MemorySize": 1024,
+    "Role": {
+     "Fn::GetAtt": [
+      "CDCProcessorServiceRoleC69BB556",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 300,
+    "TracingConfig": {
+     "Mode": "Active"
+    }
+   },
+   "DependsOn": [
+    "CDCProcessorServiceRoleDefaultPolicy37C13FDB",
+    "CDCProcessorServiceRoleC69BB556"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/CDCProcessor/Resource",
+    "aws:asset:path": "asset.8cee1febcba75138400921cc978c6dcd6fd3e63cadb9428b2180bc2143db50f4",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Code"
+   }
+  },
+  "CDCProcessorDynamoDBEventSourceEcosystemCLComputeStackPatternTable750C33429075F0E2": {
+   "Type": "AWS::Lambda::EventSourceMapping",
+   "Properties": {
+    "BatchSize": 50,
+    "BisectBatchOnFunctionError": true,
+    "DestinationConfig": {
+     "OnFailure": {
+      "Destination": {
+       "Fn::GetAtt": [
+        "CDCDeadLetterQueue4D130C83",
+        "Arn"
+       ]
+      }
+     }
+    },
+    "EventSourceArn": "arn:aws:dynamodb:us-west-2:219895243073:table/HelixPatternEntries/stream/2025-09-03T23:00:14.265",
+    "FunctionName": {
+     "Ref": "CDCProcessor417BF916"
+    },
+    "FunctionResponseTypes": [
+     "ReportBatchItemFailures"
+    ],
+    "MaximumBatchingWindowInSeconds": 5,
+    "MaximumRetryAttempts": 3,
+    "ParallelizationFactor": 1,
+    "StartingPosition": "TRIM_HORIZON"
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcosystemCL-ComputeStack/CDCProcessor/DynamoDBEventSource:EcosystemCLComputeStackPatternTable750C3342/Resource"
+   }
+  },
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/21Sy27CMBD8lt6N2yKknimlCKmPNFRckWOWdMGxU3sNQlH+vZukaRDqaWfH+5ixPZbj+4m8u1GnMNLbw8hgJqsVKX0QTG0q0GNZrUstZju7TmYiiZlBvYqZBWq4AaUuEnyqzMDAD9w0BKdRETr7V9yA+TJpwpuihSI4qbNIPB4ZDoOXlsAz7gs6Jb/ZlFjrVwGWxAp09EjnhXexbDVcErUAHWQ1MzHwuOa4h8/K56qRGQ5PsEOLvchrxllSaMEPXC3CNw/9iBBbNy2oBapCVqnrbqKNieNba6V3qBbG5dz54vI/uT3moQTlLlrdrOCiRHllDBjB70Lwyn5ZRWvwIr/q2hCLD3KuQxpbI7VIIbjoNXeyb1cMKWv8/yjx7ohb8I8qgOAXBOKNOdq86XmPVEaqhXVbkPtwexxP5AP/pH1AHPloCQuQaRd/ANewt1pmAgAA"
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/2VSwXLaMBD9ltyFmpAeeiWUZDLTpC7O5Mqs5QUEsuRqVzCMRv/ekQwmSU/v6e1a+/ZZUzm9+y5vb+BIE9XuJ0Y3MtYMai+WSC54hQKOtIqopjK+90rM1/a9mosqNEarOjQWOWtXtnSB8Q0ag1f9qs2InNLA2tmxOZPFc5XhFfgJGI9wEpXXB2C8XvxsGb3FsWFwcj7NmEFtO7QsalTBaz49eRf64uGjkAQqknFuAjH6XL7QR/AbyDZp/xPX2uqLya+Kswzaor9qSdBfkvFPwFC2KSQJDZ2MSzckUbByRqtifWBJtCcLnWsbWeJ5AEJh3IZk/OU24wYXngQx9utgVZ5KMlbgwRg0omZgfAG11XbI/cP5y1crBtqTXChahrKboHsZH4LaDzmf2QDZUBKUZ725Xpf/X0gSyrjQHoHVVsaZAd/lWiFJGOiaFlbWtbgj+Vrg8WxA0P0KiJBJzjKcm2Wcr+3Yszig5bo8wBfoe2035ZX8p6Yk5oHYdeNzzVGP/FOp8u6gW/Ql5DK6Zticr/4duA+cRLYsd/TtMJ3Kux/y9mZHWk98sKw7lMsB/wG+GmRjNwMAAA=="
    },
    "Metadata": {
     "aws:cdk:path": "EcosystemCL-ComputeStack/CDKMetadata/Default"
@@ -1192,6 +1481,36 @@
    },
    "Export": {
     "Name": "ProjectAtlasStateMachineArn"
+   }
+  },
+  "CDCProcessorArn": {
+   "Description": "CDC Processor Lambda ARN",
+   "Value": {
+    "Fn::GetAtt": [
+     "CDCProcessor417BF916",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "CDCProcessorArn"
+   }
+  },
+  "CDCDLQUrl": {
+   "Description": "CDC Dead Letter Queue URL",
+   "Value": {
+    "Ref": "CDCDeadLetterQueue4D130C83"
+   },
+   "Export": {
+    "Name": "CDCDLQUrl"
+   }
+  },
+  "VersionBucketName": {
+   "Description": "Pattern Version S3 Bucket Name",
+   "Value": {
+    "Ref": "PatternVersionBucketBC85B1D3"
+   },
+   "Export": {
+    "Name": "PatternVersionBucket"
    }
   },
   "ExportsOutputFnGetAttTaskQueueF51BE51CArnEED53A76": {

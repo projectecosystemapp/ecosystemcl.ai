@@ -16,16 +16,31 @@
         }
       }
     },
-    "75291cee0ee94c0660e388e2d418c2f375757fbd1c27453c6c9b669d2dcecc55": {
+    "8cee1febcba75138400921cc978c6dcd6fd3e63cadb9428b2180bc2143db50f4": {
+      "displayName": "CDCProcessor/Code",
+      "source": {
+        "path": "asset.8cee1febcba75138400921cc978c6dcd6fd3e63cadb9428b2180bc2143db50f4",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "219895243073-us-west-2-bbc6d082": {
+          "bucketName": "cdk-hnb659fds-assets-219895243073-us-west-2",
+          "objectKey": "8cee1febcba75138400921cc978c6dcd6fd3e63cadb9428b2180bc2143db50f4.zip",
+          "region": "us-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-file-publishing-role-219895243073-us-west-2"
+        }
+      }
+    },
+    "5c5978c83fe71ef2b053aac63d9269ffc8a8cbf1f1467e8479c9f9248cd80963": {
       "displayName": "EcosystemCL-Compute Template",
       "source": {
         "path": "EcosystemCL-ComputeStack.template.json",
         "packaging": "file"
       },
       "destinations": {
-        "219895243073-us-west-2-63aaac13": {
+        "219895243073-us-west-2-08bc7b8d": {
           "bucketName": "cdk-hnb659fds-assets-219895243073-us-west-2",
-          "objectKey": "75291cee0ee94c0660e388e2d418c2f375757fbd1c27453c6c9b669d2dcecc55.json",
+          "objectKey": "5c5978c83fe71ef2b053aac63d9269ffc8a8cbf1f1467e8479c9f9248cd80963.json",
           "region": "us-west-2",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-file-publishing-role-219895243073-us-west-2"
         }

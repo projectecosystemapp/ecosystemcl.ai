@@ -16,7 +16,7 @@
     "aws:cdk:path": "EcosystemCL-ApiStack/EcosystemAPI/Resource"
    }
   },
-  "EcosystemAPIDeploymentF641CB1Fc7c80ed0c7b97344d295cb0edff960ea": {
+  "EcosystemAPIDeploymentF641CB1Feca016260eefce2f5afe0f4b39f28583": {
    "Type": "AWS::ApiGateway::Deployment",
    "Properties": {
     "Description": "ECOSYSTEMCL.AI Platform API",
@@ -51,14 +51,14 @@
    "Type": "AWS::ApiGateway::Stage",
    "Properties": {
     "DeploymentId": {
-     "Ref": "EcosystemAPIDeploymentF641CB1Fc7c80ed0c7b97344d295cb0edff960ea"
+     "Ref": "EcosystemAPIDeploymentF641CB1Feca016260eefce2f5afe0f4b39f28583"
     },
     "MethodSettings": [
      {
-      "DataTraceEnabled": true,
+      "DataTraceEnabled": false,
       "HttpMethod": "*",
-      "LoggingLevel": "ERROR",
-      "MetricsEnabled": true,
+      "LoggingLevel": "OFF",
+      "MetricsEnabled": false,
       "ResourcePath": "/*",
       "ThrottlingBurstLimit": 1000,
       "ThrottlingRateLimit": 500
@@ -624,7 +624,7 @@
      "IntegrationResponses": [
       {
        "ResponseTemplates": {
-        "application/json": "{\"status\":\"healthy\",\"service\":\"ECOSYSTEMCL.AI\",\"timestamp\":\"2025-09-03T22:59:26.405Z\"}"
+        "application/json": "{\"status\":\"healthy\",\"service\":\"ECOSYSTEMCL.AI\",\"timestamp\":\"2025-09-04T02:30:00.953Z\"}"
        },
        "StatusCode": "200"
       }
@@ -656,9 +656,7 @@
     "IdentitySource": "method.request.header.Authorization",
     "Name": "CognitoAuthorizer",
     "ProviderARNs": [
-     {
-      "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttUserPool6BA7E5F2Arn686ACC00"
-     }
+     "arn:aws:cognito-idp:us-west-2:219895243073:userpool/us-west-2_F5eg8nTgU"
     ],
     "RestApiId": {
      "Ref": "EcosystemAPI5F04BC6C"
@@ -729,19 +727,9 @@
        ],
        "Effect": "Allow",
        "Resource": [
+        "arn:aws:dynamodb:us-west-2:219895243073:table/HelixPatternEntries",
         {
-         "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttHelixPatternEntriesD80A9318Arn058D2365"
-        },
-        {
-         "Fn::Join": [
-          "",
-          [
-           {
-            "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttHelixPatternEntriesD80A9318Arn058D2365"
-           },
-           "/index/*"
-          ]
-         ]
+         "Ref": "AWS::NoValue"
         }
        ]
       }
@@ -767,13 +755,13 @@
     ],
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-219895243073-us-west-2",
-     "S3Key": "d7532005b26324893f9b2a12cb6e5867acf9545eadf5d1b57daa260a1360f2cd.zip"
+     "S3Key": "a9da97337abcf344984a317be4f62b9d1196b6a5f15e69eb66caecf40f9cc5b8.zip"
     },
     "Environment": {
      "Variables": {
-      "PATTERN_TABLE_NAME": {
-       "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputRefHelixPatternEntriesD80A9318917C9230"
-      },
+      "HELIX_TABLE_NAME": "HelixPatternEntries",
+      "OPENSEARCH_ENDPOINT": "",
+      "REDIS_ENDPOINT": "",
       "NODE_OPTIONS": "--enable-source-maps"
      }
     },
@@ -798,7 +786,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "EcosystemCL-ApiStack/HelixLookupFunction/Resource",
-    "aws:asset:path": "asset.d7532005b26324893f9b2a12cb6e5867acf9545eadf5d1b57daa260a1360f2cd",
+    "aws:asset:path": "asset.a9da97337abcf344984a317be4f62b9d1196b6a5f15e69eb66caecf40f9cc5b8",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Code"
    }
@@ -865,19 +853,9 @@
        ],
        "Effect": "Allow",
        "Resource": [
+        "arn:aws:dynamodb:us-west-2:219895243073:table/HelixPatternEntries",
         {
-         "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttHelixPatternEntriesD80A9318Arn058D2365"
-        },
-        {
-         "Fn::Join": [
-          "",
-          [
-           {
-            "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttHelixPatternEntriesD80A9318Arn058D2365"
-           },
-           "/index/*"
-          ]
-         ]
+         "Ref": "AWS::NoValue"
         }
        ]
       },
@@ -898,19 +876,9 @@
        ],
        "Effect": "Allow",
        "Resource": [
+        "arn:aws:dynamodb:us-west-2:219895243073:table/WorkspaceStates",
         {
-         "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttWorkspaceStates6310A076ArnD1B61578"
-        },
-        {
-         "Fn::Join": [
-          "",
-          [
-           {
-            "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputFnGetAttWorkspaceStates6310A076ArnD1B61578"
-           },
-           "/index/*"
-          ]
-         ]
+         "Ref": "AWS::NoValue"
         }
        ]
       },
@@ -951,15 +919,13 @@
     },
     "Environment": {
      "Variables": {
-      "PATTERN_TABLE_NAME": {
-       "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputRefHelixPatternEntriesD80A9318917C9230"
-      },
-      "WORKSPACE_TABLE_NAME": {
-       "Fn::ImportValue": "EcosystemCL-Database:ExportsOutputRefWorkspaceStates6310A07673C5D374"
-      },
+      "HELIX_TABLE_NAME": "HelixPatternEntries",
+      "WORKSPACE_TABLE_NAME": "WorkspaceStates",
       "TASK_QUEUE_URL": {
        "Fn::ImportValue": "EcosystemCL-Compute:ExportsOutputRefTaskQueueF51BE51CA692F10C"
       },
+      "OPENSEARCH_ENDPOINT": "",
+      "REDIS_ENDPOINT": "",
       "NODE_OPTIONS": "--enable-source-maps"
      }
     },
@@ -1006,7 +972,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/1VRzU6EMBB+Fu+lKm7imdV4UwlGr6QLIztQWuxM3SDh3W0XiOtpvr9MZ6apTG938uZKnSip6i7ReJDTG6uqE0EqJzVgoxhOapRTAcTZgOLh02zwEQZtxx4MR/WChRYNRG0BIW+9q2CvCMQz8NHW0VzR5q6dV2wbg2zfCVxurabMh6zDH3AxdsEK+PJhnA+lsVZs3dLlvzYLrfpDreQUzBxcj0RoTYw+eVNxwFukNLaGluTLuWyuQNWHC1i9DBlrbjVWY6QLmgXdlYoImGQWS+By76sOOK49x+Sr58Hz38LnXDwRmmYW8WXZ0vV3upP34VNaQkycN4w9yGKpv41xWSWxAQAA"
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/1VQQW7CQAx8C/dlC6GHXoGKW1sU2l6Rk5hg2KzT2FuURvl7tYRIcJrxzGi83sQm82c7m8BFpnlxnjrKbLdTyM8GLrLvitZDxUVmPyFzuAJBAzWVoHiB1nYpii5rMuuDH+kr1o7bCr1G9W7aKZQYtYGkKByafOh8Qz1yEc0bG91b841z6Un5S7DZMjtZBj1yQ3/YxNjdlOJPQNFvcFSAcjO0PGq9cVBlBdhuffBbbCoSIfYxugk+V2I/RvaeCzyJfb/C6BqCynYpu+GREbfsKG/jOLDeyGIPIqhilxGMLOwq5GfUeHb/cOZH0DqouebiF5EvexM325M8/SaJnb/Y2eQkRNMmeKUKbTrgP5xyterFAQAA"
    },
    "Metadata": {
     "aws:cdk:path": "EcosystemCL-ApiStack/CDKMetadata/Default"

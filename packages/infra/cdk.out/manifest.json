@@ -24,7 +24,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-deploy-role-219895243073-us-west-2",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-cfn-exec-role-219895243073-us-west-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-219895243073-us-west-2/de6306a6766cea7b6ad2d0fd11dc6f2ac77b1f12a809b924639ba9ed75e5532b.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-219895243073-us-west-2/d35e4bc62eafdc68e8e05decdd663013adc6badbdf9dcf1d33f241df0e6ea4c5.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -109,19 +109,19 @@
       },
       "displayName": "EcosystemCL-StorageStack"
     },
-    "EcosystemCL-DatabaseStack.assets": {
+    "EcosystemCL-OpenSearchStack.assets": {
       "type": "cdk:asset-manifest",
       "properties": {
-        "file": "EcosystemCL-DatabaseStack.assets.json",
+        "file": "EcosystemCL-OpenSearchStack.assets.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
       }
     },
-    "EcosystemCL-DatabaseStack": {
+    "EcosystemCL-OpenSearchStack": {
       "type": "aws:cloudformation:stack",
       "environment": "aws://219895243073/us-west-2",
       "properties": {
-        "templateFile": "EcosystemCL-DatabaseStack.template.json",
+        "templateFile": "EcosystemCL-OpenSearchStack.template.json",
         "terminationProtection": false,
         "tags": {
           "Architecture": "Serverless",
@@ -132,25 +132,24 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-deploy-role-219895243073-us-west-2",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-cfn-exec-role-219895243073-us-west-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-219895243073-us-west-2/03c232369c2115b5c2ddb5cf8623344daa521b8dfb0959da01013ae59fee91ce.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-219895243073-us-west-2/5dd298ffa0b702be1c74b91b87eb5f48b0de5d9f26613ef4015ea353bfd90396.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
-          "EcosystemCL-DatabaseStack.assets"
+          "EcosystemCL-OpenSearchStack.assets"
         ],
         "lookupRole": {
           "arn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-lookup-role-219895243073-us-west-2",
           "requiresBootstrapStackVersion": 8,
           "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
         },
-        "stackName": "EcosystemCL-Database"
+        "stackName": "EcosystemCL-OpenSearch"
       },
       "dependencies": [
-        "EcosystemCL-StorageStack",
-        "EcosystemCL-DatabaseStack.assets"
+        "EcosystemCL-OpenSearchStack.assets"
       ],
       "metadata": {
-        "/EcosystemCL-DatabaseStack": [
+        "/EcosystemCL-OpenSearchStack": [
           {
             "type": "aws:cdk:stack-tags",
             "data": [
@@ -173,250 +172,122 @@
             ]
           }
         ],
-        "/EcosystemCL-DatabaseStack/HelixPatternEntries": [
-          {
-            "type": "aws:cdk:hasPhysicalName",
-            "data": {
-              "Ref": "HelixPatternEntriesD80A9318"
-            }
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/HelixPatternEntries/Resource": [
+        "/EcosystemCL-OpenSearchStack/HelixEncryptionPolicy": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "HelixPatternEntriesD80A9318"
+            "data": "HelixEncryptionPolicy"
           }
         ],
-        "/EcosystemCL-DatabaseStack/WorkspaceStates": [
-          {
-            "type": "aws:cdk:hasPhysicalName",
-            "data": {
-              "Ref": "WorkspaceStates6310A076"
-            }
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/WorkspaceStates/Resource": [
+        "/EcosystemCL-OpenSearchStack/HelixNetworkPolicy": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "WorkspaceStates6310A076"
+            "data": "HelixNetworkPolicy"
           }
         ],
-        "/EcosystemCL-DatabaseStack/AgentProfiles": [
-          {
-            "type": "aws:cdk:hasPhysicalName",
-            "data": {
-              "Ref": "AgentProfiles62EC902A"
-            }
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/AgentProfiles/Resource": [
+        "/EcosystemCL-OpenSearchStack/HelixDataAccessRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "AgentProfiles62EC902A"
+            "data": "HelixDataAccessRoleF9DC48D5"
           }
         ],
-        "/EcosystemCL-DatabaseStack/Subscriptions": [
-          {
-            "type": "aws:cdk:hasPhysicalName",
-            "data": {
-              "Ref": "Subscriptions1F71F6D8"
-            }
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/Subscriptions/Resource": [
+        "/EcosystemCL-OpenSearchStack/HelixDataPolicy": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "Subscriptions1F71F6D8"
+            "data": "HelixDataPolicy"
           }
         ],
-        "/EcosystemCL-DatabaseStack/UserPool/Resource": [
+        "/EcosystemCL-OpenSearchStack/HelixCollection": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "UserPool6BA7E5F2"
+            "data": "HelixCollection"
           }
         ],
-        "/EcosystemCL-DatabaseStack/CLIClient/Resource": [
+        "/EcosystemCL-OpenSearchStack/OCUScalingFunction/ServiceRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CLIClientCE15E884"
+            "data": "OCUScalingFunctionServiceRole53F20105"
           }
         ],
-        "/EcosystemCL-DatabaseStack/DataVPC/Resource": [
+        "/EcosystemCL-OpenSearchStack/OCUScalingFunction/ServiceRole/DefaultPolicy/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "DataVPC8DC064BE"
+            "data": "OCUScalingFunctionServiceRoleDefaultPolicy8FD6A2A5"
           }
         ],
-        "/EcosystemCL-DatabaseStack/DataVPC/IsolatedSubnet1/Subnet": [
+        "/EcosystemCL-OpenSearchStack/OCUScalingFunction/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "DataVPCIsolatedSubnet1Subnet2362BA08"
+            "data": "OCUScalingFunctionEE8BB4F6"
           }
         ],
-        "/EcosystemCL-DatabaseStack/DataVPC/IsolatedSubnet1/RouteTable": [
+        "/EcosystemCL-OpenSearchStack/ScaleUpRule/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "DataVPCIsolatedSubnet1RouteTable72828F96"
+            "data": "ScaleUpRule1971299E"
           }
         ],
-        "/EcosystemCL-DatabaseStack/DataVPC/IsolatedSubnet1/RouteTableAssociation": [
+        "/EcosystemCL-OpenSearchStack/ScaleUpRule/AllowEventRuleEcosystemCLOpenSearchStackOCUScalingFunction87694A00": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "DataVPCIsolatedSubnet1RouteTableAssociation0A09F2C9"
+            "data": "ScaleUpRuleAllowEventRuleEcosystemCLOpenSearchStackOCUScalingFunction87694A009F141403"
           }
         ],
-        "/EcosystemCL-DatabaseStack/DataVPC/IsolatedSubnet2/Subnet": [
+        "/EcosystemCL-OpenSearchStack/ScaleDownRule/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "DataVPCIsolatedSubnet2Subnet4C709E6C"
+            "data": "ScaleDownRuleFB5C2F7F"
           }
         ],
-        "/EcosystemCL-DatabaseStack/DataVPC/IsolatedSubnet2/RouteTable": [
+        "/EcosystemCL-OpenSearchStack/ScaleDownRule/AllowEventRuleEcosystemCLOpenSearchStackOCUScalingFunction87694A00": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "DataVPCIsolatedSubnet2RouteTable502C74DD"
+            "data": "ScaleDownRuleAllowEventRuleEcosystemCLOpenSearchStackOCUScalingFunction87694A008F65989A"
           }
         ],
-        "/EcosystemCL-DatabaseStack/DataVPC/IsolatedSubnet2/RouteTableAssociation": [
+        "/EcosystemCL-OpenSearchStack/CollectionEndpoint": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "DataVPCIsolatedSubnet2RouteTableAssociation89F0BEB1"
+            "data": "CollectionEndpoint"
           }
         ],
-        "/EcosystemCL-DatabaseStack/DataVPC/RestrictDefaultSecurityGroupCustomResource/Default": [
+        "/EcosystemCL-OpenSearchStack/CollectionArn": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "DataVPCRestrictDefaultSecurityGroupCustomResourceE62935CC"
+            "data": "CollectionArn"
           }
         ],
-        "/EcosystemCL-DatabaseStack/Custom::VpcRestrictDefaultSGCustomResourceProvider": [
-          {
-            "type": "aws:cdk:is-custom-resource-handler-customResourceProvider",
-            "data": true
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role": [
+        "/EcosystemCL-OpenSearchStack/DataAccessRoleArn": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0"
+            "data": "DataAccessRoleArn"
           }
         ],
-        "/EcosystemCL-DatabaseStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler": [
+        "/EcosystemCL-OpenSearchStack/EstimatedMonthlyCost": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E"
+            "data": "EstimatedMonthlyCost"
           }
         ],
-        "/EcosystemCL-DatabaseStack/RedisSecurityGroup/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "RedisSecurityGroupB05951F6"
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/RedisSubnetGroup": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "RedisSubnetGroup"
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/RedisCluster": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "RedisCluster"
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/OpenSearchSecurityGroup/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "OpenSearchSecurityGroup5212DDD0"
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/VectorSearchDomain": [
-          {
-            "type": "aws:cdk:hasPhysicalName",
-            "data": "ecosystemcl-vectors"
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/VectorSearchDomain/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "VectorSearchDomain48175A7A"
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/HelixPatternTableName": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "HelixPatternTableName"
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/HelixPatternTableArn": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "HelixPatternTableArn"
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/UserPoolId": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "UserPoolId"
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/OpenSearchEndpoint": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "OpenSearchEndpoint"
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/CDKMetadata/Default": [
+        "/EcosystemCL-OpenSearchStack/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CDKMetadata"
           }
         ],
-        "/EcosystemCL-DatabaseStack/Exports/Output{\"Fn::GetAtt\":[\"HelixPatternEntriesD80A9318\",\"Arn\"]}": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "ExportsOutputFnGetAttHelixPatternEntriesD80A9318Arn058D2365"
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/Exports/Output{\"Ref\":\"HelixPatternEntriesD80A9318\"}": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "ExportsOutputRefHelixPatternEntriesD80A9318917C9230"
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/Exports/Output{\"Fn::GetAtt\":[\"UserPool6BA7E5F2\",\"Arn\"]}": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "ExportsOutputFnGetAttUserPool6BA7E5F2Arn686ACC00"
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/Exports/Output{\"Fn::GetAtt\":[\"WorkspaceStates6310A076\",\"Arn\"]}": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "ExportsOutputFnGetAttWorkspaceStates6310A076ArnD1B61578"
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/Exports/Output{\"Ref\":\"WorkspaceStates6310A076\"}": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "ExportsOutputRefWorkspaceStates6310A07673C5D374"
-          }
-        ],
-        "/EcosystemCL-DatabaseStack/BootstrapVersion": [
+        "/EcosystemCL-OpenSearchStack/BootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "BootstrapVersion"
           }
         ],
-        "/EcosystemCL-DatabaseStack/CheckBootstrapVersion": [
+        "/EcosystemCL-OpenSearchStack/CheckBootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CheckBootstrapVersion"
           }
         ]
       },
-      "displayName": "EcosystemCL-DatabaseStack"
+      "displayName": "EcosystemCL-OpenSearchStack"
     },
     "EcosystemCL-ComputeStack.assets": {
       "type": "cdk:asset-manifest",
@@ -441,7 +312,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-deploy-role-219895243073-us-west-2",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-cfn-exec-role-219895243073-us-west-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-219895243073-us-west-2/75291cee0ee94c0660e388e2d418c2f375757fbd1c27453c6c9b669d2dcecc55.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-219895243073-us-west-2/5c5978c83fe71ef2b053aac63d9269ffc8a8cbf1f1467e8479c9f9248cd80963.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -455,8 +326,8 @@
         "stackName": "EcosystemCL-Compute"
       },
       "dependencies": [
-        "EcosystemCL-DatabaseStack",
         "EcosystemCL-StorageStack",
+        "EcosystemCL-OpenSearchStack",
         "EcosystemCL-ComputeStack.assets"
       ],
       "metadata": {
@@ -723,6 +594,54 @@
             "data": "ProjectAtlasStateMachine21FBB44A"
           }
         ],
+        "/EcosystemCL-ComputeStack/PatternVersionBucket/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PatternVersionBucketBC85B1D3"
+          }
+        ],
+        "/EcosystemCL-ComputeStack/CDCDeadLetterQueue/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDCDeadLetterQueue4D130C83"
+          }
+        ],
+        "/EcosystemCL-ComputeStack/CDCAlarmTopic/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDCAlarmTopicF09B083C"
+          }
+        ],
+        "/EcosystemCL-ComputeStack/CDCDLQAlarm/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDCDLQAlarm315E1E17"
+          }
+        ],
+        "/EcosystemCL-ComputeStack/CDCProcessor/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDCProcessorServiceRoleC69BB556"
+          }
+        ],
+        "/EcosystemCL-ComputeStack/CDCProcessor/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDCProcessorServiceRoleDefaultPolicy37C13FDB"
+          }
+        ],
+        "/EcosystemCL-ComputeStack/CDCProcessor/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDCProcessor417BF916"
+          }
+        ],
+        "/EcosystemCL-ComputeStack/CDCProcessor/DynamoDBEventSource:EcosystemCLComputeStackPatternTable750C3342/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDCProcessorDynamoDBEventSourceEcosystemCLComputeStackPatternTable750C33429075F0E2"
+          }
+        ],
         "/EcosystemCL-ComputeStack/TaskQueueUrl": [
           {
             "type": "aws:cdk:logicalId",
@@ -733,6 +652,24 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "StateMachineArn"
+          }
+        ],
+        "/EcosystemCL-ComputeStack/CDCProcessorArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDCProcessorArn"
+          }
+        ],
+        "/EcosystemCL-ComputeStack/CDCDLQUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDCDLQUrl"
+          }
+        ],
+        "/EcosystemCL-ComputeStack/VersionBucketName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VersionBucketName"
           }
         ],
         "/EcosystemCL-ComputeStack/CDKMetadata/Default": [
@@ -791,7 +728,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-deploy-role-219895243073-us-west-2",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::219895243073:role/cdk-hnb659fds-cfn-exec-role-219895243073-us-west-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-219895243073-us-west-2/1e1312e9a4f3e48949258f3acd0f776b74a57456feec78cb9a31e8bf02c570e8.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-219895243073-us-west-2/cf264259b8cc77167b19e1c40ab0ae629f5bb805f0275cedd9c62cc4f0489361.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -806,7 +743,7 @@
       },
       "dependencies": [
         "EcosystemCL-ComputeStack",
-        "EcosystemCL-DatabaseStack",
+        "EcosystemCL-OpenSearchStack",
         "EcosystemCL-ApiStack.assets"
       ],
       "metadata": {
@@ -842,7 +779,7 @@
         "/EcosystemCL-ApiStack/EcosystemAPI/Deployment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "EcosystemAPIDeploymentF641CB1Fc7c80ed0c7b97344d295cb0edff960ea"
+            "data": "EcosystemAPIDeploymentF641CB1Feca016260eefce2f5afe0f4b39f28583"
           }
         ],
         "/EcosystemCL-ApiStack/EcosystemAPI/DeploymentStage.v1/Resource": [

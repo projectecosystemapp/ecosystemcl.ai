@@ -125,7 +125,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/zPSMzI00TNQTCwv1k1OydbNyUzSqw4uSUzO1gEKxRcb61U7lSZnp5boOKflQVi1tTp5+SmpelnF+mVGJnrmQN1ZxZmZukWleSWZual6QRAaAFXuyW1aAAAA"
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/zPSMzI00TNQTCwv1k1OydbNyUzSqw4uSUzO1kksL44vNtardipNzk4t0XFOy4Owamt18vJTUvWyivXLjIz0DC30DBSzijMzdYtK80oyc1P1giA0AAUHy4RbAAAA"
    },
    "Metadata": {
     "aws:cdk:path": "EcosystemCL-StorageStack/CDKMetadata/Default"

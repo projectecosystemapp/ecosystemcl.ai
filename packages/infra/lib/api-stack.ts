@@ -90,7 +90,9 @@ export class ApiStack extends cdk.Stack {
       memorySize: 512,
       timeout: cdk.Duration.seconds(10),
       environment: {
-        PATTERN_TABLE_NAME: patternTable.tableName,
+        HELIX_TABLE_NAME: patternTable.tableName,
+        OPENSEARCH_ENDPOINT: process.env.OPENSEARCH_ENDPOINT || '',
+        REDIS_ENDPOINT: process.env.REDIS_ENDPOINT || '',
         NODE_OPTIONS: '--enable-source-maps',
       },
       bundling: {
@@ -115,9 +117,11 @@ export class ApiStack extends cdk.Stack {
       memorySize: 1024,
       timeout: cdk.Duration.seconds(30),
       environment: {
-        PATTERN_TABLE_NAME: patternTable.tableName,
+        HELIX_TABLE_NAME: patternTable.tableName,
         WORKSPACE_TABLE_NAME: workspaceTable.tableName,
         TASK_QUEUE_URL: props.taskQueue.queueUrl,
+        OPENSEARCH_ENDPOINT: process.env.OPENSEARCH_ENDPOINT || '',
+        REDIS_ENDPOINT: process.env.REDIS_ENDPOINT || '',
         NODE_OPTIONS: '--enable-source-maps',
       },
       bundling: {

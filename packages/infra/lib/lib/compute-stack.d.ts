@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as stepfunctions from 'aws-cdk-lib/aws-stepfunctions';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
@@ -17,6 +18,8 @@ export declare class ComputeStack extends cdk.Stack {
     readonly ecsCluster: ecs.Cluster;
     readonly taskQueue: sqs.Queue;
     readonly deadLetterQueue: sqs.Queue;
+    readonly cdcDeadLetterQueue: sqs.Queue;
+    readonly cdcProcessor: lambda.Function;
     readonly orchestrationStateMachine: stepfunctions.StateMachine;
     constructor(scope: Construct, id: string, props: ComputeStackProps);
 }

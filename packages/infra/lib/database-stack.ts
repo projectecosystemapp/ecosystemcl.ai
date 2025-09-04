@@ -209,10 +209,10 @@ export class DatabaseStack extends cdk.Stack {
       encryptionAtRest: {
         enabled: true,
       },
-      vpcOptions: {
-        subnets: [vpc.isolatedSubnets[0]],
-        securityGroups: [openSearchSecurityGroup],
-      },
+      // vpcOptions: {
+      //   subnets: [vpc.isolatedSubnets[0]],
+      //   securityGroups: [openSearchSecurityGroup],
+      // },
       logging: {
         slowSearchLogEnabled: false,
         appLogEnabled: false,
