@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from 'aws-amplify/auth/server';
-import { runWithAmplifyServerContext } from 'aws-amplify/adapter-nextjs';
+import { runWithAmplifyServerContext } from '@/lib/server-runner';
 import { cookies } from 'next/headers';
 import { randomBytes } from 'crypto';
 
 // In-memory store for simplicity (use Redis in production)
-const deviceCodeStore = new Map<string, {
+// Note: This should be extracted to a separate module in production
+let deviceCodeStore = new Map<string, {
   userCode: string;
   userId?: string;
   status: 'pending' | 'authorized' | 'denied' | 'expired';
@@ -145,6 +146,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-// Export for use in poll endpoint
-export { deviceCodeStore };

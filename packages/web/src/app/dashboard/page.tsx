@@ -1,8 +1,8 @@
 import { getCurrentUser } from 'aws-amplify/auth/server';
 import { redirect } from "next/navigation";
 import { cookies } from 'next/headers';
-import { runWithAmplifyServerContext } from 'aws-amplify/adapter-nextjs';
-import outputs from '../../../amplify_outputs.json';
+import { runWithAmplifyServerContext } from '@/lib/server-runner';
+import awsConfig from '@/config';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

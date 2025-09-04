@@ -1,23 +1,36 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useAuthenticator } from '@aws-amplify/ui-react';
+import { getCurrentUser } from 'aws-amplify/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle, XCircle, Terminal } from 'lucide-react';
 
-export default function DeviceAuthPage() {
+function DeviceAuthContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user } = useAuthenticator((context) => [context.user]);
+  const [user, setUser] = useState<any>(null);
   
   const [userCode, setUserCode] = useState('');
   const [inputCode, setInputCode] = useState('');
   const [status, setStatus] = useState<'input' | 'authorizing' | 'success' | 'error'>('input');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    checkUser();
+  }, []);
+
+  const checkUser = async () => {
+    try {
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+    } catch (error) {
+      setUser(null);
+    }
+  };
 
   useEffect(() => {
     // Get user_code from URL if provided
@@ -172,5 +185,13 @@ export default function DeviceAuthPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function DeviceAuthPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DeviceAuthContent />
+    </Suspense>
   );
 }

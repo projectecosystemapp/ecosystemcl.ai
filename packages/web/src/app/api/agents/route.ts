@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from 'aws-amplify/auth/server';
-import { runWithAmplifyServerContext } from 'aws-amplify/adapter-nextjs';
+import { runWithAmplifyServerContext } from '@/lib/server-runner';
 import { cookies } from 'next/headers';
 
 const AGENTS = [

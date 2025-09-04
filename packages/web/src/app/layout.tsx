@@ -2,12 +2,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Amplify } from 'aws-amplify';
-import { Authenticator } from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
-import outputs from '../../amplify_outputs.json';
+import awsConfig from '@/config';
 import Header from "@/components/Header";
 
-Amplify.configure(outputs);
+Amplify.configure(awsConfig);
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,10 +35,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.className} bg-slate-900 text-white`}>
-        <Authenticator.Provider>
-          <Header />
-          <main>{children}</main>
-        </Authenticator.Provider>
+        <Header />
+        <main>{children}</main>
       </body>
     </html>
   );

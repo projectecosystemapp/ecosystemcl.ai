@@ -4,16 +4,36 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Terminal, Download, Users, CreditCard, Menu, LogOut } from "lucide-react";
-import { useAuthenticator } from '@aws-amplify/ui-react';
+import { getCurrentUser, signOut } from 'aws-amplify/auth';
 import { useEffect, useState } from 'react';
 
 export default function Header() {
-  const { user, signOut } = useAuthenticator((context) => [context.user]);
+  const [user, setUser] = useState<any>(null);
   const [isClient, setIsClient] = useState(false);
   
   useEffect(() => {
     setIsClient(true);
+    checkUser();
   }, []);
+
+  const checkUser = async () => {
+    try {
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+    } catch (error) {
+      setUser(null);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      setUser(null);
+      window.location.href = '/auth';
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+  };
   
   if (!isClient) {
     return null;
@@ -62,7 +82,7 @@ export default function Header() {
                     Dashboard
                   </Link>
                 </Button>
-                <Button variant="outline" size="sm" onClick={signOut}>
+                <Button variant="outline" size="sm" onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
                 </Button>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { runWithAmplifyServerContext } from 'aws-amplify/adapter-nextjs';
 import { getCurrentUser } from 'aws-amplify/auth/server';
-import outputs from '../amplify_outputs.json';
+import { runWithAmplifyServerContext } from './lib/server-runner';
+import awsConfig from './config';
 
 const protectedRoutes = [
   '/dashboard',
@@ -26,7 +26,17 @@ export async function middleware(request: NextRequest) {
   if (protectedRoutes.some(route => pathname.startsWith(route))) {
     try {
       const user = await runWithAmplifyServerContext({
-        nextServerContext: { cookies: request.cookies },
+        nextServerContext: { 
+          cookies: async () => {
+            return {
+              get: (name: string) => request.cookies.get(name),
+              getAll: () => request.cookies.getAll(),
+              has: (name: string) => request.cookies.has(name),
+              set: () => {},  // No-op for middleware
+              delete: () => {} // No-op for middleware
+            } as any;
+          }
+        },
         operation: (contextSpec) => getCurrentUser(contextSpec)
       });
       
