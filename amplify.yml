@@ -24,6 +24,6 @@ applications:
       phases:
         build:
           commands:
+            - pnpm install --no-frozen-lockfile
             - cd amplify
-            - npm ci --legacy-peer-deps
-            - npx ampx generate
+            - npx ampx generate --branch $AWS_BRANCH
