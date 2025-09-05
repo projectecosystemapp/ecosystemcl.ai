@@ -61,6 +61,9 @@ importers:
 
   packages/web:
     dependencies:
+      '@aws-amplify/adapter-nextjs':
+        specifier: ^1.6.8
+        version: 1.6.8(aws-amplify@6.15.5)(next@15.5.2(@babel/core@7.28.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.55.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))
       '@aws-amplify/backend':
         specifier: ^1.16.1
         version: 1.16.1(@aws-cdk/cli-plugin-contract@2.181.1)(@aws-sdk/client-cloudformation@3.879.0)(@aws-sdk/client-s3@3.879.0)(@aws-sdk/types@3.862.0)(aws-cdk-lib@2.214.0(constructs@10.4.2))(constructs@10.4.2)(zod@3.25.17)
@@ -326,6 +329,12 @@ packages:
 
   '@asamuzakjp/dom-selector@2.0.2':
     resolution: {integrity: sha512-x1KXOatwofR6ZAYzXRBL5wrdV0vwNxlTCK9NCuLqAzQYARqGcvFwiJA6A1ERuh+dgeA4Dxm3JBYictIes+SqUQ==}
+
+  '@aws-amplify/adapter-nextjs@1.6.8':
+    resolution: {integrity: sha512-GY93BkdguUCw8Bc7mDxxWs6Pw1A/eTccX3aFErs4nu80HrBalAJxmToKhfFnhqw3OSJ4sqIQFihCU/djoLENHA==}
+    peerDependencies:
+      aws-amplify: ^6.13.1
+      next: '>=13.5.0 <16.0.0'
 
   '@aws-amplify/analytics@7.0.86':
     resolution: {integrity: sha512-1CEaP6hA1kdBcDbXOg0MFw7Kpwu6Lt93S7r0/Oy/vu9bR3AzKPe/muT8euljmCFl/bY16zqZvY6vUW+WeA0jIw==}
@@ -4440,6 +4449,10 @@ packages:
       - yaml
       - mime-types
 
+  aws-jwt-verify@4.0.1:
+    resolution: {integrity: sha512-kzvi71eD3w/mCpYRUY7cz6DX4bfYihGdI2yV3FYQ2JuZZenqAqDPz0gWj0ew6vlAtdEVBNb7p+Dm2TAIxpVYMA==}
+    engines: {node: '>=14.0.0'}
+
   aws4@1.13.2:
     resolution: {integrity: sha512-lHe62zvbTB5eEABUVi/AwVh0ZKY9rMMDhmm+eeyuuUQbQ3+J+fONVQOZyj+DdrvD4BY33uYniyRJ4UJIaSKAfw==}
 
@@ -8524,6 +8537,12 @@ snapshots:
       css-tree: 2.3.1
       is-potential-custom-element-name: 1.0.1
 
+  '@aws-amplify/adapter-nextjs@1.6.8(aws-amplify@6.15.5)(next@15.5.2(@babel/core@7.28.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.55.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))':
+    dependencies:
+      aws-amplify: 6.15.5
+      aws-jwt-verify: 4.0.1
+      next: 15.5.2(@babel/core@7.28.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.55.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+
   '@aws-amplify/analytics@7.0.86(@aws-amplify/core@6.13.1)':
     dependencies:
       '@aws-amplify/core': 6.13.1
@@ -10266,7 +10285,7 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/client-sso-oidc': 3.621.0(@aws-sdk/client-sts@3.879.0)
+      '@aws-sdk/client-sso-oidc': 3.621.0(@aws-sdk/client-sts@3.621.0)
       '@aws-sdk/client-sts': 3.621.0
       '@aws-sdk/core': 3.621.0
       '@aws-sdk/credential-provider-node': 3.621.0(@aws-sdk/client-sso-oidc@3.621.0(@aws-sdk/client-sts@3.621.0))(@aws-sdk/client-sts@3.621.0)
@@ -10404,7 +10423,7 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/client-sso-oidc': 3.621.0(@aws-sdk/client-sts@3.621.0)
+      '@aws-sdk/client-sso-oidc': 3.621.0(@aws-sdk/client-sts@3.879.0)
       '@aws-sdk/client-sts': 3.621.0
       '@aws-sdk/core': 3.621.0
       '@aws-sdk/credential-provider-node': 3.621.0(@aws-sdk/client-sso-oidc@3.621.0(@aws-sdk/client-sts@3.621.0))(@aws-sdk/client-sts@3.621.0)
@@ -15595,6 +15614,8 @@ snapshots:
       '@aws-cdk/asset-node-proxy-agent-v6': 2.1.0
       '@aws-cdk/cloud-assembly-schema': 48.7.0
       constructs: 10.4.2
+
+  aws-jwt-verify@4.0.1: {}
 
   aws4@1.13.2: {}
 

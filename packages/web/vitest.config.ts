@@ -1,13 +1,11 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vitest/config';
 import path from 'path';
 // @ts-ignore - use CommonJS require for shared script
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const thresholds = require('../../scripts/coverage-threshold.js');
 
 export default defineConfig({
-  plugins: [react()],
   test: {
     environment: 'happy-dom',
     globals: true,
