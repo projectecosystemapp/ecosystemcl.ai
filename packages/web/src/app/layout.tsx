@@ -4,10 +4,10 @@ import "./globals.css";
 import { Amplify } from 'aws-amplify';
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
-import outputs from '../../amplify_outputs.json';
+import { awsconfig } from '../config';
 import Header from "@/components/Header";
 
-Amplify.configure(outputs);
+Amplify.configure(awsconfig);
 
 const inter = Inter({ subsets: ["latin"] });
 
